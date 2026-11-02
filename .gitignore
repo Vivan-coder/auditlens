@@ -1,0 +1,17 @@
+# Environments and secrets
+.venv/
+.env
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+# Generated data and outputs (regenerate with python -m auditlens.generate)
+data/
+outputs/
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

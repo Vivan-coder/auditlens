@@ -1,0 +1,47 @@
+# AuditLens configuration. All thresholds live here, not in code.
+
+company:
+  name: "Gulf Meridian Trading W.L.L."   # fictional
+  currency: BHD
+  fiscal_year: 2025
+
+calendar:
+  country: BH                  # Bahrain public holidays (weekend = Friday/Saturday)
+  period_close_days: 5         # a period closes this many days after month end
+
+# Approval hierarchy. Roles are ranked; an approver must outrank the creator.
+# approval_limit = the largest single entry the role can approve.
+roles:
+  ap_clerk:             {rank: 0, approval_limit: 0,       count: 3}
+  accountant:           {rank: 1, approval_limit: 25000,   count: 3}
+  senior_accountant:    {rank: 2, approval_limit: 100000,  count: 2}
+  financial_controller: {rank: 3, approval_limit: 500000,  count: 1}
+  cfo:                  {rank: 4, approval_limit: 5000000, count: 1}
+
+generation:
+  seed: 42
+  target_lines: 50000          # approximate number of journal lines
+  n_vendors: 110               # regular (non-recurring) vendors
+  n_employees: 60
+  # relative monthly volume (Jan..Dec): seasonal revenue, Ramadan dip in March, strong Q4
+  sales_seasonality:    [0.85, 0.80, 0.80, 0.85, 1.00, 0.95, 0.90, 0.90, 1.05, 1.15, 1.25, 1.35]
+  purchase_seasonality: [0.90, 0.85, 0.85, 0.90, 1.00, 1.00, 0.95, 0.95, 1.05, 1.10, 1.15, 1.20]
+
+# Number of planted anomalies per type (labels are written to a SEPARATE file).
+anomalies:
+  duplicate_payment: 25
+  split_purchase_groups: 12
+  weekend_holiday_posting: 30
+  round_amount: 30
+  same_creator_approver: 30
+  post_close_posting: 15
+  backdated_posting: 15
+  ghost_vendor_bank: 2
+  ghost_vendor_address: 1
+  bank_change_large_payment: 8
+  invoice_sequence_gap: 10
+  invoice_sequence_out_of_order: 10
+  unusual_pairing: 24
+  rare_user_account: 25
+  benford_vendor_invoices: 60
+  large_manual_period_end: 12
