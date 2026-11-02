@@ -2,7 +2,8 @@
 
 Streamlit Community Cloud hosts Streamlit apps from a GitHub repository for free. AuditLens needs no
 secrets, database or data files: when `data/` is absent it generates the synthetic demo ledger in
-memory on first load (about 10 seconds) and caches it.
+memory on first load and caches it (about 10 seconds on a fast laptop; allow up to a minute or two on a cold
+free-tier machine).
 
 ## Steps
 
@@ -25,7 +26,8 @@ Entry detail, Benford analysis, Evaluation, Data upload).
 
 ## Behaviour to know about
 
-* **First load is slower.** Generating and analysing 50,000 lines takes roughly 10 seconds. The result is
+* **First load is slower.** Generating and analysing 50,000 lines takes about 10 seconds locally, but a test from a
+  brand-new environment took about a minute. A spinner ("Preparing the demo ledger") is shown. The result is
   cached for every later visitor until the app restarts.
 * **Memory.** The app holds one dataset in memory (a few hundred MB at most). Community Cloud's free tier
   is enough; if it ever restarts, it simply regenerates.
