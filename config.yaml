@@ -86,3 +86,42 @@ rules:
     rare_pair_max_count: 3     # a debit/credit account pair seen at most this many times all year
     rare_user_account_max_count: 3
     user_min_entries: 50       # only judge users with a real history
+
+# ---- Phase 3: machine learning and combined risk score ---------------------------------------
+ml:
+  n_estimators: 300
+  seed: 42
+  flag_percentile: 0.98        # entries in the top 2% of Isolation Forest scores are ML-flagged
+  explain_top_features: 3      # features quoted in an ML reason
+
+scoring:
+  # Evidence weight of each rule (0-100). Several hits combine as a "noisy OR", so they add up
+  # but never exceed 100. Strong, specific tests weigh more than weak or noisy ones.
+  rule_weights:
+    DUP_SAME_INVOICE: 40
+    DUP_EXACT_AMOUNT: 35
+    DUP_NEAR_AMOUNT: 8
+    SPLIT_BELOW_LIMIT: 35
+    SELF_APPROVED: 35
+    NO_APPROVER: 30
+    APPROVER_OVER_LIMIT: 25
+    WEEKEND_POSTING: 25
+    HOLIDAY_POSTING: 25
+    POST_CLOSE_POSTING: 35
+    BACKDATED_POSTING: 25
+    ROUND_AMOUNT: 25
+    LARGE_MANUAL_PERIOD_END: 40
+    LARGE_MANUAL: 25
+    GHOST_VENDOR_BANK: 45
+    GHOST_VENDOR_ADDRESS: 35
+    BANK_CHANGE_LARGE_PAYMENT: 35
+    INVOICE_GAP: 25
+    INVOICE_OUT_OF_ORDER: 30
+    DUPLICATE_INVOICE_NUMBER: 30
+    BENFORD_VENDOR: 15         # vendor-level signal, so it flags every invoice of the vendor
+    RARE_ACCOUNT_PAIR: 30
+    RARE_USER_ACCOUNT: 25
+  default_rule_weight: 15      # for rule codes not listed above
+  ml_max_points: 30            # the ML score can add at most this many points, and only to
+                               # ML-flagged entries (top ml.flag_percentile of anomaly scores)
+  queue_min_score: 1           # entries below this are not put in the review queue

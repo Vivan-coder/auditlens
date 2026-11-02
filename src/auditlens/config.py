@@ -131,6 +131,20 @@ class RulesCfg(_Strict):
     pairings: PairingsCfg
 
 
+class MLCfg(_Strict):
+    n_estimators: int = Field(gt=10)
+    seed: int
+    flag_percentile: float = Field(gt=0.5, lt=1)
+    explain_top_features: int = Field(ge=1)
+
+
+class ScoringCfg(_Strict):
+    rule_weights: dict[str, float]
+    default_rule_weight: float = Field(ge=0, le=100)
+    ml_max_points: float = Field(ge=0, le=100)
+    queue_min_score: float = Field(ge=0)
+
+
 class Config(_Strict):
     """Whole configuration file."""
 
@@ -141,6 +155,8 @@ class Config(_Strict):
     anomalies: AnomalyCountsCfg
     accounts: AccountsCfg
     rules: RulesCfg
+    ml: MLCfg
+    scoring: ScoringCfg
 
 
 def load_config(path: Path | str | None = None) -> Config:

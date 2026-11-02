@@ -8,7 +8,7 @@ KPMG Bahrain internship application. **All data is synthetic.** Free tools only,
 
 - [x] Phase 1: synthetic data generator, data dictionary, tests
 - [x] Phase 2: rule-based audit tests (`src/auditlens/rules/`)
-- [ ] Phase 3: ML features, Isolation Forest, combined risk score (`src/auditlens/ml/`)
+- [x] Phase 3: ML features, Isolation Forest, combined risk score (`src/auditlens/ml/`, `pipeline.py`)
 - [ ] Phase 4: evaluation (`src/auditlens/evaluate.py`)
 - [ ] Phase 5: Streamlit dashboard (`app.py`, `dashboard/`)
 - [ ] Phase 6: CI, README, methodology, deployment notes
@@ -18,6 +18,7 @@ KPMG Bahrain internship application. **All data is synthetic.** Free tools only,
 | Task | Command |
 |------|---------|
 | Generate data | `python -m auditlens.generate` (`--seed N`, `--lines N`, `--out DIR`) |
+| Analyse (review queue) | `python -m auditlens.pipeline` |
 | Evaluate | `python -m auditlens.evaluate` |
 | Run app | `streamlit run app.py` |
 | Test | `pytest` |
@@ -35,7 +36,8 @@ src/auditlens/
   synth/                 master_data, context (entry builders), baseline, inject_* (one per anomaly family)
   dataset.py             Dataset (journal + master data) and the one-row-per-entry view
   rules/                 one module per test family; each run(Dataset) -> flags table
-  ml/                    (Phase 3) features, model, scoring
+  ml/                    features (no labels), Isolation Forest + explanations, risk score + review queue
+  pipeline.py            analyse(Dataset) -> AnalysisResult (rules + ML + queue); CLI writes outputs/
   evaluate.py            (Phase 4) metrics against labels.csv
 docs/                    data_dictionary.md, methodology.md (later), deployment notes (later)
 tests/                   pytest
@@ -51,6 +53,13 @@ vendors: `GHOST_VENDOR_BANK`, `GHOST_VENDOR_ADDRESS`, `BANK_CHANGE_LARGE_PAYMENT
 `INVOICE_OUT_OF_ORDER`, `DUPLICATE_INVOICE_NUMBER` | benford: `BENFORD_VENDOR` | pairings: `RARE_ACCOUNT_PAIR`,
 `RARE_USER_ACCOUNT`. Rules that need master data (vendors, employees, users, bank changes) skip when it is absent,
 so an uploaded journal-only CSV still runs the rest.
+
+## Scoring
+
+`risk = min(100, rule_score + ml_points)`. `rule_score` = noisy-OR of per-rule weights (`scoring.rule_weights`),
+so several hits add up but saturate below 100. `ml_points` (0 to `ml_max_points`) go only to entries in the top
+`ml.flag_percentile` of Isolation Forest scores, so every queued entry has a reason. ML features exclude the rule
+signals (self-approval, near-limit, missing approver) so the model is an independent view.
 
 ## Rules for working in this repo
 
