@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import re
 from datetime import date, timedelta
 
 from auditlens import bh_calendar as cal
-from auditlens.synth.context import Entry, GenContext
+from auditlens.synth.context import INVOICE_RE, Entry, GenContext
 from auditlens.synth.master_data import (
     CATEGORIES,
     VendorMeta,
@@ -16,7 +15,6 @@ from auditlens.synth.master_data import (
     make_bank_account,
 )
 
-INVOICE_RE = re.compile(r"^INV-(\d+)(.*)$")
 SMALL_DECADES = {2: 0.5, 3: 0.5}
 
 
@@ -144,14 +142,15 @@ def _renumber(ctx: GenContext, vid: str, old: str, new: str) -> None:
             e.description = e.description.replace(old, new)
 
 
-def _shift_from(ctx: GenContext, vid: str, from_number: int, jump: int) -> None:
-    """Add `jump` to every numeric invoice number >= from_number for a vendor."""
-    for e in ctx.entries:
-        m = INVOICE_RE.match(e.invoice_number or "") if e.vendor_id == vid else None
-        if m and int(m.group(1)) >= from_number:
-            old = e.invoice_number
-            e.invoice_number = f"INV-{int(m.group(1)) + jump:06d}{m.group(2)}"
-            e.description = e.description.replace(old or "", e.invoice_number)
+def _number(entry: Entry) -> int:
+    """Numeric part of an INV-nnnnnn invoice number."""
+    m = INVOICE_RE.match(entry.invoice_number or "")
+    return int(m.group(1)) if m else 0
+
+
+def _break_positions(invs: list[Entry]) -> list[int]:
+    """Positions whose document date is strictly later than the previous invoice's."""
+    return [i for i in range(5, len(invs) - 3) if invs[i].document_date > invs[i - 1].document_date]
 
 
 def inject_invoice_sequence_breaks(ctx: GenContext, n_gap: int, n_ooo: int) -> None:
@@ -163,18 +162,17 @@ def inject_invoice_sequence_breaks(ctx: GenContext, n_gap: int, n_ooo: int) -> N
     for kind, vi in zip(plan, order, strict=False):
         vid = vendors[int(vi)]
         invs = _vendor_invoices(ctx, vid)
-        pos = int(ctx.rng.integers(5, len(invs) - 3))
-        target = invs[pos]
-        if target.uid in labelled:
+        options = [i for i in _break_positions(invs) if invs[i].uid not in labelled]
+        if not options:
             continue
-        num = int(INVOICE_RE.match(target.invoice_number or "").group(1))  # type: ignore[union-attr]
+        pos = options[int(ctx.rng.integers(len(options)))]
+        target = invs[pos]
         if kind == "gap":
             jump = int(ctx.rng.integers(80, 400))
-            _shift_from(ctx, vid, num, jump)
+            ctx.shift_invoice_numbers(vid, _number(target), jump)
             ctx.label(target, "invoice_sequence_break", note=f"gap: numbers jump by {jump}")
         else:
-            prev = int(INVOICE_RE.match(invs[pos - 1].invoice_number or "").group(1))  # type: ignore[union-attr]
-            new = prev - int(ctx.rng.integers(1, 4))
+            new = _number(invs[pos - 1]) - int(ctx.rng.integers(1, 4))
             existing = {e.invoice_number for e in ctx.entries if e.vendor_id == vid}
             while f"INV-{new:06d}" in existing:
                 new -= 1

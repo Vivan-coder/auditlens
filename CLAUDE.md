@@ -7,7 +7,7 @@ KPMG Bahrain internship application. **All data is synthetic.** Free tools only,
 ## Status
 
 - [x] Phase 1: synthetic data generator, data dictionary, tests
-- [ ] Phase 2: rule-based audit tests (`src/auditlens/rules/`)
+- [x] Phase 2: rule-based audit tests (`src/auditlens/rules/`)
 - [ ] Phase 3: ML features, Isolation Forest, combined risk score (`src/auditlens/ml/`)
 - [ ] Phase 4: evaluation (`src/auditlens/evaluate.py`)
 - [ ] Phase 5: Streamlit dashboard (`app.py`, `dashboard/`)
@@ -33,13 +33,24 @@ src/auditlens/
   bh_calendar.py         Bahrain calendar: weekend = Fri/Sat, public holidays, period close dates
   generate.py            orchestrator + CLI; writes data/*.csv
   synth/                 master_data, context (entry builders), baseline, inject_* (one per anomaly family)
-  rules/                 (Phase 2) one module per test family
+  dataset.py             Dataset (journal + master data) and the one-row-per-entry view
+  rules/                 one module per test family; each run(Dataset) -> flags table
   ml/                    (Phase 3) features, model, scoring
   evaluate.py            (Phase 4) metrics against labels.csv
 docs/                    data_dictionary.md, methodology.md (later), deployment notes (later)
 tests/                   pytest
 data/, outputs/          generated, gitignored
 ```
+
+## Rule codes (flags table: entry_id, family, rule_code, reason, related_entry_id)
+
+duplicates: `DUP_SAME_INVOICE`, `DUP_EXACT_AMOUNT`, `DUP_NEAR_AMOUNT` (weak) | approval: `SPLIT_BELOW_LIMIT`,
+`SELF_APPROVED`, `NO_APPROVER`, `APPROVER_OVER_LIMIT` | timing: `WEEKEND_POSTING`, `HOLIDAY_POSTING`,
+`POST_CLOSE_POSTING`, `BACKDATED_POSTING` | amounts: `ROUND_AMOUNT`, `LARGE_MANUAL_PERIOD_END`, `LARGE_MANUAL` |
+vendors: `GHOST_VENDOR_BANK`, `GHOST_VENDOR_ADDRESS`, `BANK_CHANGE_LARGE_PAYMENT` | sequence: `INVOICE_GAP`,
+`INVOICE_OUT_OF_ORDER`, `DUPLICATE_INVOICE_NUMBER` | benford: `BENFORD_VENDOR` | pairings: `RARE_ACCOUNT_PAIR`,
+`RARE_USER_ACCOUNT`. Rules that need master data (vendors, employees, users, bank changes) skip when it is absent,
+so an uploaded journal-only CSV still runs the rest.
 
 ## Rules for working in this repo
 
@@ -55,6 +66,7 @@ data/, outputs/          generated, gitignored
 - Git: commit once per phase after tests pass, push to `origin main`. Commits carry only the user's
   identity (no co-author trailers).
 - Run `pytest` and `ruff check .` before every commit.
+- Tests that exercise one rule use tiny hand-built ledgers (`tests/helpers.py`), one planted case and one clean case.
 
 ## Domain notes
 

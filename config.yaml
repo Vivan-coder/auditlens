@@ -45,3 +45,44 @@ anomalies:
   rare_user_account: 25
   benford_vendor_invoices: 60
   large_manual_period_end: 12
+
+# Account codes the tests rely on (change these to run AuditLens on another chart of accounts)
+accounts:
+  payables: 2000
+  cash: 1000
+
+# ---- Phase 2: audit test thresholds ----------------------------------------------------------
+rules:
+  duplicates:
+    window_days: 7             # two payments to one vendor this close together are suspicious
+    amount_tolerance_pct: 0.5  # ...if amounts differ by no more than this percentage (weak evidence)
+    min_amount: 100
+  split_purchase:
+    band_low_pct: 90           # "just under" an approval limit = 90% to 100% of it
+    window_days: 10
+    min_count: 3               # this many near-limit invoices (same vendor + creator) = a split
+  timing:
+    weekend_sources: [manual]  # automated month-end batches legitimately run on weekends
+    backdate_days: 30          # posting this many days after the document date = backdated
+  round_amount:
+    multiple: 1000
+    min_amount: 5000
+    sources: [manual]
+    recurring_repeat_exempt: 6 # same vendor + amount repeated this often = a contract, not a red flag
+  materiality:
+    amount: 250000             # manual entries at or above this are material
+    period_end_business_days: 3
+    sources: [manual]
+  bank_change:
+    window_days: 14            # a payment this soon after a bank-account change is risky...
+    min_amount: 20000          # ...if it is at least this large
+    median_multiple: 5         # ...and at least this multiple of the vendor's median payment
+  invoice_sequence:
+    max_gap: 50                # a jump larger than this between consecutive invoice numbers
+  benford:
+    min_invoices: 50           # chi-square is unreliable on fewer observations
+    p_threshold: 0.001
+  pairings:
+    rare_pair_max_count: 3     # a debit/credit account pair seen at most this many times all year
+    rare_user_account_max_count: 3
+    user_min_entries: 50       # only judge users with a real history

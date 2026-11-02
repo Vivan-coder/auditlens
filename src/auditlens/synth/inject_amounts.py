@@ -37,8 +37,16 @@ def inject_duplicate_payments(ctx: GenContext, n: int) -> None:
         dup.posting_date, dup.period = ctx.resolve_dates(new_date, "manual", 0)
         dup.lines[0].debit = amount
         dup.lines[1].credit = amount
-        if ctx.rng.random() < 0.5:  # re-keyed invoice number
+        variant = ctx.rng.random()
+        if variant < 1 / 3:  # same invoice paid twice: number repeated
+            pass
+        elif variant < 2 / 3:  # re-keyed with a suffix
             dup.invoice_number = f"{orig.invoice_number}-R"
+        else:  # vendor re-billed under a brand-new invoice number
+            dup.invoice_number = ctx.invoice_number_for(orig.vendor_id or "", new_date)
+        dup.description = dup.description.replace(
+            orig.invoice_number or "", dup.invoice_number or ""
+        )
         dup.approved_by = ctx.approver_for(dup.created_by, amount)
         ctx.entries.append(dup)
         ctx.label(
@@ -57,8 +65,8 @@ def inject_split_purchases(ctx: GenContext, groups: int) -> None:
         r.approval_limit for r in ctx.cfg.roles.values() if 0 < r.approval_limit <= 100000
     )
     vendors = ctx.regular_vendors()
-    for _ in range(groups):
-        vid = str(ctx.rng.choice(vendors))
+    chosen = ctx.rng.choice(vendors, size=min(groups, len(vendors)), replace=False)
+    for vid in map(str, chosen):
         limit = float(ctx.rng.choice(limits))
         start = ctx.sample_dates(1, [1] * 11 + [0.001])[0]
         for k in range(int(ctx.rng.integers(3, 6))):

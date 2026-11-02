@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import bisect
+import re
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
@@ -20,6 +21,7 @@ from auditlens.synth.master_data import (
 )
 
 MANUAL, AUTOMATED = "manual", "automated"
+INVOICE_RE = re.compile(r"^INV-(\d+)(.*)$")
 LAG_CHOICES = np.array([0, 1, 2, 3])
 LAG_PROBS = np.array([0.55, 0.25, 0.12, 0.08])
 
@@ -172,6 +174,21 @@ class GenContext:
         d = int(self.rng.choice(decades, p=probs / probs.sum()))
         return max(round(float(10 ** (d + self.rng.random())), 3), 1.0)
 
+    def shift_invoice_numbers(self, vendor_id: str, from_number: int, jump: int) -> None:
+        """Add `jump` to every numeric invoice number >= from_number for a vendor.
+
+        Used to open room in a vendor's sequence (or to create a numbering gap). Payments that
+        reference the invoices are renumbered too, so documents stay consistent.
+        """
+        for e in self.entries:
+            m = INVOICE_RE.match(e.invoice_number or "") if e.vendor_id == vendor_id else None
+            if m and int(m.group(1)) >= from_number:
+                old = e.invoice_number or ""
+                e.invoice_number = f"INV-{int(m.group(1)) + jump:06d}{m.group(2)}"
+                e.description = e.description.replace(old, e.invoice_number)
+        seq = self.vendor_seq.get(vendor_id, [])
+        self.vendor_seq[vendor_id] = [(d, n + jump if n >= from_number else n) for d, n in seq]
+
     def invoice_number_for(self, vendor_id: str, doc_date: date) -> str:
         """Next plausible vendor invoice number for a document date (keeps sequence monotonic)."""
         seq = self.vendor_seq.setdefault(vendor_id, [])
@@ -185,8 +202,11 @@ class GenContext:
         elif prev is None:
             num = max(1, nxt - int(self.rng.integers(1, 5)))
         else:
-            gap = nxt - prev
-            num = prev + (int(self.rng.integers(1, gap)) if gap >= 2 else 1)
+            if nxt - prev < 2:  # no room: the vendor kept issuing, so later numbers move up
+                self.shift_invoice_numbers(vendor_id, nxt, int(self.rng.integers(5, 16)))
+                seq = self.vendor_seq[vendor_id]
+                nxt = seq[i][1]
+            num = prev + int(self.rng.integers(1, nxt - prev))
         bisect.insort(seq, (doc_date, num))
         return f"INV-{num:06d}"
 

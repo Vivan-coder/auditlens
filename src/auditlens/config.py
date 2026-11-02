@@ -63,6 +63,74 @@ class AnomalyCountsCfg(_Strict):
     large_manual_period_end: int = Field(ge=0)
 
 
+class AccountsCfg(_Strict):
+    payables: int
+    cash: int
+
+
+class DuplicatesCfg(_Strict):
+    window_days: int = Field(gt=0)
+    amount_tolerance_pct: float = Field(ge=0)
+    min_amount: float = Field(ge=0)
+
+
+class SplitCfg(_Strict):
+    band_low_pct: float = Field(gt=0, lt=100)
+    window_days: int = Field(gt=0)
+    min_count: int = Field(ge=2)
+
+
+class TimingCfg(_Strict):
+    weekend_sources: list[str]
+    backdate_days: int = Field(gt=0)
+
+
+class RoundCfg(_Strict):
+    multiple: int = Field(gt=0)
+    min_amount: float = Field(ge=0)
+    sources: list[str]
+    recurring_repeat_exempt: int = Field(ge=2)
+
+
+class MaterialityCfg(_Strict):
+    amount: float = Field(gt=0)
+    period_end_business_days: int = Field(gt=0)
+    sources: list[str]
+
+
+class BankChangeCfg(_Strict):
+    window_days: int = Field(gt=0)
+    min_amount: float = Field(ge=0)
+    median_multiple: float = Field(gt=0)
+
+
+class SequenceCfg(_Strict):
+    max_gap: int = Field(gt=0)
+
+
+class BenfordCfg(_Strict):
+    min_invoices: int = Field(ge=10)
+    p_threshold: float = Field(gt=0, lt=1)
+
+
+class PairingsCfg(_Strict):
+    rare_pair_max_count: int = Field(ge=0)
+    rare_user_account_max_count: int = Field(ge=0)
+    user_min_entries: int = Field(ge=1)
+
+
+class RulesCfg(_Strict):
+    duplicates: DuplicatesCfg
+    split_purchase: SplitCfg
+    timing: TimingCfg
+    round_amount: RoundCfg
+    materiality: MaterialityCfg
+    bank_change: BankChangeCfg
+    invoice_sequence: SequenceCfg
+    benford: BenfordCfg
+    pairings: PairingsCfg
+
+
 class Config(_Strict):
     """Whole configuration file."""
 
@@ -71,6 +139,8 @@ class Config(_Strict):
     roles: dict[str, RoleCfg]
     generation: GenerationCfg
     anomalies: AnomalyCountsCfg
+    accounts: AccountsCfg
+    rules: RulesCfg
 
 
 def load_config(path: Path | str | None = None) -> Config:

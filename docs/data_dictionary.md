@@ -83,7 +83,7 @@ An entry can carry more than one label. Evaluation works at **entry level**: eac
 
 | `anomaly_type` | What is planted | Entries labelled |
 |----------------|-----------------|------------------|
-| `duplicate_payment` | Second payment to the same vendor, same or within 0.5% amount, 1-3 business days later; half re-keyed with a `-R` invoice suffix | the duplicate (`injected`) and the original (`counterpart`) |
+| `duplicate_payment` | Second payment to the same vendor, same or within 0.5% amount, 1-3 business days later; the invoice number is repeated, re-keyed with a `-R` suffix, or brand new (one third each) | the duplicate (`injected`) and the original (`counterpart`) |
 | `split_purchase` | 3-5 invoices of 90-99.5% of an approval limit, same vendor and clerk, within a few days | each invoice |
 | `weekend_holiday_posting` | Manual invoice posted on a Friday/Saturday or a Bahrain public holiday | the invoice |
 | `round_amount` | Manual invoice for an exact multiple of 10,000 | the invoice |
