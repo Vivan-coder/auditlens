@@ -25,7 +25,7 @@ PAGES = {
 
 
 def _sidebar() -> None:
-    st.sidebar.markdown("## AuditLens")
+    st.sidebar.markdown('<div class="al-brand">AuditLens</div>', unsafe_allow_html=True)
     st.sidebar.caption("Audit analytics for journal entries: audit tests + unsupervised ML.")
     st.sidebar.radio("Navigate", list(PAGES), key="nav", label_visibility="collapsed")
     if "upload_bundle" in st.session_state:

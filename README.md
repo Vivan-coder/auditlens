@@ -16,7 +16,7 @@ set of known, deliberately planted anomalies.
 | | |
 |---|---|
 | ![Overview](docs/images/screenshot-overview.png) | ![Review queue](docs/images/screenshot-queue.png) |
-| *Overview: scale, risk distribution, value at risk* | *Review queue: ranked, filterable, with reasons* |
+| *Overview: executive summary, risk tiers, findings with suggested procedures* | *Review queue: ranked, filterable, with reasons* |
 | ![Entry detail](docs/images/screenshot-detail.png) | ![Benford analysis](docs/images/screenshot-benford.png) |
 | *Entry detail: every reason, lines, related entries* | *Benford analysis: a vendor with fabricated amounts* |
 
@@ -36,9 +36,14 @@ set of known, deliberately planted anomalies.
 * **Honest evaluation.** Precision, recall and F1 per anomaly type for rules alone, ML alone and combined;
   precision at the top 50 and 100; confidence intervals; a multi-seed stability check; and a written list of
   weaknesses.
-* **Streamlit dashboard.** Overview, filterable review queue, entry detail with related entries (for example
-  the matching duplicate), per-vendor Benford chart, evaluation page, and CSV upload with column mapping and
-  validation. Reviewers can mark entries *reviewed* or *false positive* and **export an Excel workpaper**.
+* **Streamlit dashboard.** An executive summary with High / Medium / Low risk tiers and suggested follow-up
+  procedures per finding theme; a filterable review queue (filters apply together, so the page stays smooth);
+  entry detail with related entries (for example the matching duplicate); a per-vendor Benford chart; an
+  evaluation page; and CSV upload with column mapping and validation. Reviewers mark entries *reviewed* or
+  *false positive*, add notes, and **export an Excel workpaper**.
+* **Audit-style workpaper.** The Excel export has a cover sheet (entity, period, purpose, scope, procedures
+  performed, legend, conclusion box, preparer and reviewer sign-off), a filterable print-ready entries sheet
+  with a status drop-down, and a status summary.
 
 ## How it works
 

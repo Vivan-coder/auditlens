@@ -1,4 +1,4 @@
-"""Overview page: what was scanned, what was flagged, and how much value is exposed."""
+"""Overview page: executive summary, risk tiers, key themes with follow-up, supporting charts."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from auditlens.summary import headline, split_attention, themes, tier_counts
 from dashboard import state, style
 from dashboard.state import Bundle
 
@@ -18,38 +19,69 @@ def _flag_counts(b: Bundle) -> pd.DataFrame:
     return c
 
 
-def render(b: Bundle) -> None:
-    """Render the overview."""
-    st.title("Overview")
-    if b.synthetic:
-        style.synthetic_banner()
+def _executive_summary(b: Bundle) -> None:
     cfg = b.dataset.cfg
-    q = b.queue
-    thr = cfg.evaluation.combined_threshold
-    high = q[q["risk_score"] >= thr]
+    body = _md_to_html(headline(b.result, cfg))
+    st.markdown(
+        f'<div class="al-card"><h4>Executive summary</h4>{body}</div>', unsafe_allow_html=True
+    )
+
+
+def _md_to_html(text: str) -> str:
+    """Bold markers to <b> for the HTML card (headline() uses **bold** only)."""
+    parts = text.split("**")
+    return "".join(f"<b>{p}</b>" if i % 2 else p for i, p in enumerate(parts))
+
+
+def _kpis(b: Bundle) -> None:
+    q, cfg = b.queue, b.dataset.cfg
+    tc = tier_counts(q)
+    backed, ml_only = split_attention(q)
     reviewed = sum(1 for e in q["entry_id"] if state.status_of(b, e) != "Pending")
+    n = len(b.dataset.entries)
     style.kpi_row(
         [
+            ("Entries scanned", f"{n:,}", f"{len(b.dataset.journal):,} journal lines"),
             (
-                "Entries scanned",
-                f"{len(b.dataset.entries):,}",
-                f"{len(b.dataset.journal):,} journal lines",
+                "High risk",
+                f"{tc['High']:,}",
+                f"risk score {cfg.scoring.risk_tiers.high:g}+",
+                "High",
             ),
             (
-                "In review queue",
-                f"{len(q):,}",
-                f"{100 * len(q) / max(len(b.dataset.entries), 1):.1f}% of entries",
+                "Medium risk",
+                f"{tc['Medium']:,}",
+                f"risk score {cfg.scoring.risk_tiers.medium:g} to {cfg.scoring.risk_tiers.high:g}",
+                "Medium",
             ),
-            ("High risk", f"{len(high):,}", f"risk score {thr:g} or more"),
             (
-                "Value at risk",
-                f"{high['amount'].sum():,.0f}",
-                f"{cfg.company.currency}, high-risk entries",
+                "Value to follow up",
+                f"{backed['amount'].sum():,.0f}",
+                f"{cfg.company.currency}, rule-backed entries",
             ),
             ("Review progress", f"{reviewed:,} / {len(q):,}", "reviewed or cleared"),
         ]
     )
-    st.write("")
+
+
+def _themes(b: Bundle) -> None:
+    style.section("Key findings and suggested follow-up")
+    found = themes(b.result, b.dataset.cfg)
+    if not found:
+        st.info("No high or medium risk themes were found.")
+        return
+    cur = b.dataset.cfg.company.currency
+    for t in found:
+        codes = ", ".join(f"`{c}`" for c in t.top_codes)
+        with st.expander(f"{t.title}: {t.entries:,} entries, {cur} {t.value:,.0f}"):
+            st.markdown(f"**Triggered by:** {codes}")
+            st.markdown(f"**Suggested procedure:** {t.procedure}")
+            st.caption("Open the Review queue and filter by the codes above to see each entry.")
+
+
+def _charts(b: Bundle) -> None:
+    style.section("Supporting analysis")
+    q, cfg = b.queue, b.dataset.cfg
     left, right = st.columns(2)
     with left:
         counts = _flag_counts(b)
@@ -76,6 +108,7 @@ def render(b: Bundle) -> None:
         )
         fig.update_layout(xaxis_title="Risk score", yaxis_title="Entries", bargap=0.08)
         style.show(style.style_figure(fig, 250))
+        high, _ = split_attention(q)
         by_month = (
             high.assign(Month=high["posting_date"].dt.strftime("%Y-%m"))
             .groupby("Month")["amount"]
@@ -86,7 +119,7 @@ def render(b: Bundle) -> None:
             by_month,
             x="Month",
             y="amount",
-            title=f"High-risk value by month ({cfg.company.currency})",
+            title=f"Rule-backed high and medium risk value by month ({cfg.company.currency})",
             color_discrete_sequence=[style.BLUE],
         )
         fig.update_layout(xaxis_title=None, yaxis_title=None, bargap=0.25)
@@ -103,9 +136,22 @@ def render(b: Bundle) -> None:
     )
     fig.update_layout(xaxis_title=None, yaxis_title=None)
     style.show(style.style_figure(fig, 320))
+
+
+def render(b: Bundle) -> None:
+    """Render the overview."""
+    style.page_header("Overview", f"{b.name}: executive summary of the journal-entry analysis")
+    if b.synthetic:
+        style.synthetic_banner()
+    if b.queue.empty:
+        st.info("Nothing was flagged in this dataset.")
+        return
+    _executive_summary(b)
+    _kpis(b)
+    _themes(b)
+    _charts(b)
     st.caption(
         "Risk score = weighted audit-rule evidence (up to 100) plus up to "
-        f"{cfg.scoring.ml_max_points:g} points from the Isolation Forest for statistically "
-        "unusual entries. "
-        "It is a screening indicator, not a finding."
+        f"{b.dataset.cfg.scoring.ml_max_points:g} points from the Isolation Forest for "
+        "statistically unusual entries. It is a screening indicator, not a finding."
     )

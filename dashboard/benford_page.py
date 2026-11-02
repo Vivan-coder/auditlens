@@ -57,7 +57,7 @@ def digit_chart(s: dict, title: str) -> go.Figure:
 
 def render(b: Bundle) -> None:
     """Render the Benford page."""
-    st.title("Benford analysis")
+    style.page_header("Benford analysis", "First-digit analysis of vendor invoice amounts")
     if b.synthetic:
         style.synthetic_banner()
     cfg = b.dataset.cfg.rules.benford

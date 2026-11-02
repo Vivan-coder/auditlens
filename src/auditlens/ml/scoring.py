@@ -58,6 +58,15 @@ def combined_scores(entry_ids: pd.Index, flags: pd.DataFrame, scores: pd.DataFra
     return out
 
 
+def risk_tier(score: pd.Series, cfg: Config) -> pd.Series:
+    """High / Medium / Low label from the risk score (cut-offs in config scoring.risk_tiers)."""
+    t = cfg.scoring.risk_tiers
+    return pd.Series(
+        pd.cut(score, [-1, t.medium - 1e-9, t.high - 1e-9, 101], labels=["Low", "Medium", "High"]),
+        index=score.index,
+    ).astype(str)
+
+
 def build_review_queue(
     ds: Dataset, flags: pd.DataFrame, scores: pd.DataFrame, cfg: Config
 ) -> pd.DataFrame:
@@ -84,6 +93,7 @@ def build_review_queue(
     q = q[q["risk_score"] >= cfg.scoring.queue_min_score]
     q = q.sort_values(["risk_score", "ml_score", "amount"], ascending=False)
     q.insert(0, "rank", range(1, len(q) + 1))
+    q.insert(3, "risk_tier", risk_tier(q["risk_score"], cfg))
     q["n_flags"] = q["n_flags"].fillna(0).astype(int)
     for col in ("rule_codes", "reasons", "related_entry_ids"):
         q[col] = q[col].fillna("")

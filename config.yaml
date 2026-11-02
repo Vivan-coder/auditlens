@@ -125,6 +125,9 @@ scoring:
   ml_max_points: 30            # the ML score can add at most this many points, and only to
                                # ML-flagged entries (top ml.flag_percentile of anomaly scores)
   queue_min_score: 1           # entries below this are not put in the review queue
+  risk_tiers:                  # labels shown to reviewers
+    high: 50                   # risk score at or above: High
+    medium: 20                 # at or above: Medium (below: Low)
 
 # ---- Phase 4: evaluation ------------------------------------------------------------------------
 evaluation:

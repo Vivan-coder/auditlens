@@ -87,6 +87,13 @@ def _review_controls(b: Bundle, entry_id: str) -> None:
     )
 
 
+@st.fragment
+def _review_panel(b: Bundle, entry_id: str) -> None:
+    """Status pill and controls; a fragment, so changing status does not redraw the whole page."""
+    st.markdown(style.pill(state.status_of(b, entry_id)), unsafe_allow_html=True)
+    _review_controls(b, entry_id)
+
+
 def _vendor_panel(b: Bundle, vendor_id: str) -> None:
     v = b.dataset.vendors
     if v.empty or vendor_id not in set(v["vendor_id"]):
@@ -119,7 +126,9 @@ def _neighbours(q: pd.DataFrame, entry_id: str) -> tuple[str | None, str | None]
 
 def render(b: Bundle) -> None:
     """Render the entry detail page."""
-    st.title("Entry detail")
+    style.page_header(
+        "Entry detail", "Why an entry was flagged, and what the auditor should look at"
+    )
     q = b.queue
     options = list(q["entry_id"])
     current = st.session_state.get("detail_entry")
@@ -135,12 +144,16 @@ def render(b: Bundle) -> None:
     e = b.dataset.entries.set_index("entry_id").loc[entry_id]
     sc = b.result.scores.loc[entry_id]
     rank = q.index[q["entry_id"] == entry_id]
+    tier = str(q.loc[rank[0], "risk_tier"]) if len(rank) else ""
     style.kpi_row(
         [
             (
                 "Risk score",
                 f"{sc['risk_score']:.0f}",
-                f"queue rank {int(q.loc[rank[0], 'rank'])}" if len(rank) else "not in queue",
+                f"{tier} risk, queue rank {int(q.loc[rank[0], 'rank'])}"
+                if len(rank)
+                else "not in queue",
+                tier if tier in ("High", "Medium") else "",
             ),
             ("Rule evidence", f"{sc['rule_score']:.0f}", "weighted audit tests"),
             (
@@ -170,9 +183,9 @@ def render(b: Bundle) -> None:
 
     left, right = st.columns([3, 2])
     with left:
-        st.subheader("Why it was flagged")
+        style.section("Why it was flagged")
         _reasons(b, entry_id)
-        st.subheader("Journal lines")
+        style.section("Journal lines")
         st.dataframe(
             _lines(b, entry_id),
             hide_index=True,
@@ -183,7 +196,7 @@ def render(b: Bundle) -> None:
             },
         )
         rel = related_entries(b, entry_id)
-        st.subheader("Related entries")
+        style.section("Related entries")
         if rel.empty:
             st.caption("No related entries found.")
         else:
@@ -192,7 +205,7 @@ def render(b: Bundle) -> None:
                 with st.expander(f"Lines of {rid}"):
                     st.dataframe(_lines(b, rid), hide_index=True, width="stretch")
     with right:
-        st.subheader("Entry")
+        style.section("Entry")
         fields = {
             "Entry ID": entry_id,
             "Description": e["description"],
@@ -208,8 +221,7 @@ def render(b: Bundle) -> None:
             else "none",
         }
         st.table(pd.Series(fields, name="Value").astype(str))
-        st.subheader("Review")
-        st.markdown(style.status_badge(state.status_of(b, entry_id)), unsafe_allow_html=True)
-        _review_controls(b, entry_id)
+        style.section("Review")
+        _review_panel(b, entry_id)
         if isinstance(e["vendor_id"], str):
             _vendor_panel(b, e["vendor_id"])

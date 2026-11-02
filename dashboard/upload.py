@@ -15,7 +15,7 @@ from auditlens.schema import (
     template_csv,
     validate_journal,
 )
-from dashboard import state
+from dashboard import state, style
 from dashboard.state import UPLOADED, Bundle
 
 NONE = "(not in my file)"
@@ -98,7 +98,7 @@ def _run_analysis(name: str, journal: pd.DataFrame) -> None:
 
 def render(b: Bundle) -> None:
     """Render the upload page."""
-    st.title("Data upload")
+    style.page_header("Data upload", "Bring your own journal-entry CSV: map, validate, analyse")
     st.markdown(
         "Upload a journal-entry CSV (one row per journal line). Map your columns to the AuditLens "
         "schema, validate, then run the same audit tests and anomaly model on your data. "

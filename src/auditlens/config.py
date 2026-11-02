@@ -138,11 +138,17 @@ class MLCfg(_Strict):
     explain_top_features: int = Field(ge=1)
 
 
+class RiskTiersCfg(_Strict):
+    high: float = Field(gt=0, le=100)
+    medium: float = Field(gt=0, le=100)
+
+
 class ScoringCfg(_Strict):
     rule_weights: dict[str, float]
     default_rule_weight: float = Field(ge=0, le=100)
     ml_max_points: float = Field(ge=0, le=100)
     queue_min_score: float = Field(ge=0)
+    risk_tiers: RiskTiersCfg
 
 
 class EvaluationCfg(_Strict):

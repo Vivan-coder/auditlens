@@ -1,8 +1,9 @@
-"""Review queue: ranked entries, filters, bulk reviewer actions and Excel export."""
+"""Review queue: ranked entries, filters, bulk reviewer actions and Excel workpaper export."""
 
 from __future__ import annotations
 
 import re
+from functools import partial
 
 import pandas as pd
 import streamlit as st
@@ -12,6 +13,11 @@ from dashboard import state, style
 from dashboard.state import STATUSES, Bundle
 
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+TIER_CELL = {
+    "High": "background-color:#fde3e2;color:#a02827;font-weight:600",
+    "Medium": "background-color:#fdf0d0;color:#8a5a00;font-weight:600",
+    "Low": "background-color:#eceae4;color:#52514e",
+}
 
 
 def _date_bounds(q: pd.DataFrame) -> tuple:
@@ -21,6 +27,8 @@ def _date_bounds(q: pd.DataFrame) -> tuple:
 def filtered_queue(b: Bundle, q: pd.DataFrame, f: dict) -> pd.DataFrame:
     """Apply the filter dictionary to the queue (pure function, easy to test)."""
     m = (q["risk_score"] >= f["min_risk"]) & q["amount"].between(f["amt_min"], f["amt_max"])
+    if f.get("tiers"):
+        m &= q["risk_tier"].isin(f["tiers"])
     if f["codes"]:
         pat = "|".join(re.escape(c) for c in f["codes"])
         m &= q["rule_codes"].str.contains(pat)
@@ -41,10 +49,11 @@ def filtered_queue(b: Bundle, q: pd.DataFrame, f: dict) -> pd.DataFrame:
 
 
 def _filters(b: Bundle, q: pd.DataFrame) -> dict:
+    """Filter form: values apply together when the user presses Apply (no per-click reruns)."""
     names = b.account_names
-    with st.container(border=True):
+    with st.form("queue_filters", border=True):
         c1, c2, c3 = st.columns(3)
-        min_risk = c1.slider("Minimum risk score", 0, 100, 0)
+        tiers = c1.multiselect("Risk tier", ["High", "Medium", "Low"])
         codes = c2.multiselect(
             "Test / reason code", sorted({c for s in q["rule_codes"] for c in s.split(";") if c})
         )
@@ -56,13 +65,16 @@ def _filters(b: Bundle, q: pd.DataFrame) -> dict:
         accounts = c6.multiselect(
             "Account", acct_opts, format_func=lambda a: f"{a} {names.get(a, '')}".strip()
         )
-        c7, c8 = st.columns(2)
+        c7, c8, c9 = st.columns([2, 2, 2])
         lo, hi = _date_bounds(q)
         dr = c7.date_input("Posting date", (lo, hi), min_value=lo, max_value=hi)
         top = float(q["amount"].max())
         amt = c8.slider("Entry amount", 0.0, top, (0.0, top))
+        min_risk = c9.slider("Minimum risk score", 0, 100, 0)
+        st.form_submit_button("Apply filters", type="primary")
     return {
         "min_risk": min_risk,
+        "tiers": tiers,
         "codes": codes,
         "status": status,
         "users": users,
@@ -80,6 +92,7 @@ def _view(b: Bundle, q: pd.DataFrame) -> pd.DataFrame:
             "rank",
             "entry_id",
             "risk_score",
+            "risk_tier",
             "posting_date",
             "amount",
             "vendor_id",
@@ -88,7 +101,8 @@ def _view(b: Bundle, q: pd.DataFrame) -> pd.DataFrame:
             "reasons",
         ]
     ].copy()
-    v.insert(3, "status", [state.status_of(b, e) for e in v["entry_id"]])
+    v.insert(4, "status", [state.status_of(b, e) for e in v["entry_id"]])
+    v["posting_date"] = v["posting_date"].dt.date
     v["reasons"] = v["reasons"].str.slice(0, 220)
     for col in ("vendor_id", "created_by"):
         v[col] = v[col].fillna("")
@@ -129,9 +143,20 @@ def _bulk_buttons(b: Bundle, selected: list[str]) -> None:
     )
 
 
+def _workpaper_inputs(b: Bundle) -> dict:
+    cfg = b.dataset.cfg
+    with st.expander("Workpaper details (printed on the Excel cover sheet)"):
+        c1, c2 = st.columns(2)
+        entity = c1.text_input("Entity", value=cfg.company.name, key="wp_entity")
+        period = c2.text_input("Period", value=f"FY{cfg.company.fiscal_year}", key="wp_period")
+        preparer = c1.text_input("Prepared by", key="wp_preparer")
+        reviewer = c2.text_input("Reviewed by", key="wp_reviewer")
+    return {"entity": entity, "period": period, "preparer": preparer, "reviewer": reviewer}
+
+
 def render(b: Bundle) -> None:
     """Render the review queue page."""
-    st.title("Review queue")
+    style.page_header("Review queue", "Ranked exceptions for follow-up, with reviewer sign-off")
     if b.synthetic:
         style.synthetic_banner()
     q = b.queue
@@ -141,12 +166,13 @@ def render(b: Bundle) -> None:
     f = _filters(b, q)
     fq = filtered_queue(b, q, f)
     st.markdown(
-        f"**{len(fq):,}** entries match - total value **{fq['amount'].sum():,.0f}** "
+        f"**{len(fq):,}** entries match, total value **{fq['amount'].sum():,.0f}** "
         f"{b.dataset.cfg.company.currency}. Select rows to review them."
     )
     view = _view(b, fq)
+    shown = view.style.map(lambda t: TIER_CELL.get(t, ""), subset=["risk_tier"])
     event = st.dataframe(
-        view,
+        shown,
         key="queue_table",
         on_select="rerun",
         selection_mode="multi-row",
@@ -159,6 +185,7 @@ def render(b: Bundle) -> None:
             "risk_score": st.column_config.ProgressColumn(
                 "Risk", min_value=0, max_value=100, format="%.0f"
             ),
+            "risk_tier": st.column_config.TextColumn("Tier", width="small"),
             "posting_date": st.column_config.DateColumn("Posted"),
             "amount": st.column_config.NumberColumn("Amount", format="%.2f"),
             "vendor_id": "Vendor",
@@ -170,10 +197,22 @@ def render(b: Bundle) -> None:
     )
     selected = [view.iloc[i]["entry_id"] for i in event.selection.rows if i < len(view)]
     _bulk_buttons(b, selected)
+    meta = _workpaper_inputs(b)
+    # Built only when the user clicks download, from plain snapshots (runs on another thread).
+    build = partial(
+        build_workpaper,
+        fq,
+        dict(state.statuses(b)),
+        dict(state.notes(b)),
+        b.name,
+        n_scanned=len(b.dataset.entries),
+        **meta,
+    )
     st.download_button(
         "Export filtered entries to Excel workpaper",
-        data=build_workpaper(fq, state.statuses(b), state.notes(b), b.name),
+        data=build,
         file_name="auditlens_workpaper.xlsx",
         mime=XLSX_MIME,
         disabled=fq.empty,
+        type="primary",
     )

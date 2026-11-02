@@ -38,6 +38,7 @@ src/auditlens/
   rules/                 one module per test family; each run(Dataset) -> flags table
   ml/                    features (no labels), Isolation Forest + explanations, risk score + review queue
   pipeline.py            analyse(Dataset) -> AnalysisResult (rules + ML + queue); CLI writes outputs/
+  summary.py             executive summary: risk tiers, rule-backed vs ML-only, themes + suggested procedures
   schema.py              CSV column mapping + pydantic validation (strict dates, balance check)
   export.py              Excel audit workpaper (openpyxl)
   evaluate.py            metrics vs labels.csv (entry level); eval_report.py / eval_charts.py render report + PNGs
@@ -82,6 +83,15 @@ ML weakness, small n). Do not tune thresholds against labels; if one changes, sa
 - Reviewer status/notes live in `st.session_state["reviews"][bundle.name]`; the Excel export reads them.
 - `app.py` adds `src/` to `sys.path`, so no `pip install -e .` is needed to deploy.
 - Smoke tests use `streamlit.testing.v1.AppTest` (`tests/test_app.py`); set `session_state["_goto"]` to pick a page.
+
+## Presentation conventions
+
+- Risk tiers (`scoring.risk_tiers`): High >= 50, Medium >= 20, Low below. Queue rows carry `risk_tier`.
+- Never present ML-only entries as equal to rule-backed ones: they are listed last, labelled lower-confidence, and
+  excluded from "value to follow up" (evaluation shows ~13% precision for ML alone).
+- Styling is restrained and original (navy palette). Do not use any firm's logo, name or brand assets.
+- Excel workpaper (`export.py`): Cover (scope, procedures, legend, conclusion, sign-off), Flagged entries, Summary.
+- Queue filters live in an `st.form`; review controls on the detail page are an `st.fragment`.
 
 ## Rules for working in this repo
 

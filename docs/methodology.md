@@ -162,6 +162,16 @@ risk_score  = min(100, rule_score + ml_points)
 
 The weights are a judgement, informed by audit practice; they were not fitted to the labels.
 
+**Risk tiers.** For readers, the score is banded using `scoring.risk_tiers`: **High** (50 or more),
+**Medium** (20 to 50) and **Low** (below 20). High and Medium warrant follow-up; Low entries carry a single
+weak signal and can be sampled.
+
+**Rule-backed versus ML-only.** The executive summary separates entries that match at least one specific
+audit test from entries flagged *only* as statistically unusual. The evaluation shows ML-only flags are far
+less precise (about 13%), so they are reported as a lower-confidence lead, listed last and excluded from the
+"value to follow up" figure. Each finding theme carries a suggested follow-up procedure (see
+`src/auditlens/summary.py`); these are prompts for the auditor, not conclusions.
+
 ## 5. Evaluation
 
 The generator plants 12 labelled anomaly types and writes the labels to a separate file that no test

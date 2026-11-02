@@ -94,7 +94,7 @@ def curve_chart(ev: Evaluation) -> go.Figure:
 
 def render(b: Bundle) -> None:
     """Render the evaluation page."""
-    st.title("Evaluation")
+    style.page_header("Evaluation", "How the tests performed against known, planted anomalies")
     ev = b.evaluation()
     if ev is None:
         st.info(

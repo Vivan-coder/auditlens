@@ -33,7 +33,7 @@ def test_page_renders_without_exception(page):
 def test_overview_shows_kpis_and_synthetic_notice():
     at = run_page("Overview")
     html = " ".join(m.value for m in at.markdown)
-    assert "Entries scanned" in html and "Value at risk" in html and "synthetic" in html
+    assert "Entries scanned" in html and "Value to follow up" in html and "synthetic" in html
 
 
 def test_entry_detail_lists_reasons_for_top_entry():
@@ -52,11 +52,20 @@ def test_review_status_can_be_set_from_detail_page():
     assert any(v["status"].get(entry) == "False positive" for v in review.values())
 
 
-def test_queue_filters_reduce_the_table():
+def test_queue_filters_apply_on_submit_and_reduce_the_table():
     at = run_page("Review queue")
     assert not at.exception
-    slider = next(s for s in at.slider if s.label == "Minimum risk score")
-    slider.set_value(60).run()
+    before = next(m.value for m in at.markdown if "entries match" in m.value)
+    next(s for s in at.slider if s.label == "Minimum risk score").set_value(60)
+    next(b for b in at.button if b.label == "Apply filters").click()
+    at.run()
     assert not at.exception
-    text = " ".join(m.value for m in at.markdown)
-    assert "entries match" in text
+    after = next(m.value for m in at.markdown if "entries match" in m.value)
+    assert after != before
+
+
+def test_overview_has_executive_summary_and_themes():
+    at = run_page("Overview")
+    html = " ".join(m.value for m in at.markdown)
+    assert "Executive summary" in html and "High risk" in html
+    assert any("Suggested procedure" in m.value for m in at.expander[0].markdown)
