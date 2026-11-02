@@ -10,7 +10,7 @@ KPMG Bahrain internship application. **All data is synthetic.** Free tools only,
 - [x] Phase 2: rule-based audit tests (`src/auditlens/rules/`)
 - [x] Phase 3: ML features, Isolation Forest, combined risk score (`src/auditlens/ml/`, `pipeline.py`)
 - [x] Phase 4: evaluation (`src/auditlens/evaluate.py`, `eval_report.py`, `eval_charts.py`)
-- [ ] Phase 5: Streamlit dashboard (`app.py`, `dashboard/`)
+- [x] Phase 5: Streamlit dashboard (`app.py`, `dashboard/`, `schema.py`, `export.py`)
 - [ ] Phase 6: CI, README, methodology, deployment notes
 
 ## Commands (Windows, repo root, venv active: `.venv\Scripts\activate`)
@@ -38,7 +38,11 @@ src/auditlens/
   rules/                 one module per test family; each run(Dataset) -> flags table
   ml/                    features (no labels), Isolation Forest + explanations, risk score + review queue
   pipeline.py            analyse(Dataset) -> AnalysisResult (rules + ML + queue); CLI writes outputs/
+  schema.py              CSV column mapping + pydantic validation (strict dates, balance check)
+  export.py              Excel audit workpaper (openpyxl)
   evaluate.py            metrics vs labels.csv (entry level); eval_report.py / eval_charts.py render report + PNGs
+app.py                   Streamlit shell (sidebar radio nav; pages in dashboard/, each exposes render(bundle))
+dashboard/               state (Bundle, review status), style, overview, queue, detail, benford_page, evaluation_page, upload
 docs/                    data_dictionary.md, methodology.md (later), deployment notes (later)
 tests/                   pytest
 data/, outputs/          generated, gitignored
@@ -68,6 +72,16 @@ share of that type's entries flagged at all. Precision per type for Rules/Combin
 rule designed for that type (`TYPE_CODES` in evaluate.py); ML precision is its yield. Combined = risk >=
 `evaluation.combined_threshold`. The report must state weaknesses in numbers (circularity, unrealistic base rate,
 ML weakness, small n). Do not tune thresholds against labels; if one changes, say so in the report.
+
+## Dashboard notes
+
+- Navigation: sidebar radio with key `nav`. To change page from a callback or after a rerun, call
+  `state.goto(page)`; `app.py` applies it before the radio is created (setting a widget key after it exists errors).
+- Data: uses `data/` if generated, otherwise generates the demo ledger in memory on first load (cached), so it
+  works on Streamlit Community Cloud with no data files. Uploaded data has no labels, so no Evaluation page.
+- Reviewer status/notes live in `st.session_state["reviews"][bundle.name]`; the Excel export reads them.
+- `app.py` adds `src/` to `sys.path`, so no `pip install -e .` is needed to deploy.
+- Smoke tests use `streamlit.testing.v1.AppTest` (`tests/test_app.py`); set `session_state["_goto"]` to pick a page.
 
 ## Rules for working in this repo
 
