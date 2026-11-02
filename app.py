@@ -45,7 +45,9 @@ def main() -> None:
     style.inject_css()
     if "_goto" in st.session_state:  # navigation requested by a button callback or a rerun
         st.session_state["nav"] = st.session_state.pop("_goto")
-    st.session_state.setdefault("nav", "Overview")
+    if "nav" not in st.session_state:  # deep link: ?page=Review%20queue
+        wanted = st.query_params.get("page", "Overview")
+        st.session_state["nav"] = wanted if wanted in PAGES else "Overview"
     _sidebar()
     bundle = state.active_bundle()
     PAGES[st.session_state["nav"]](bundle)

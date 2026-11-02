@@ -90,6 +90,8 @@ def _view(b: Bundle, q: pd.DataFrame) -> pd.DataFrame:
     ].copy()
     v.insert(3, "status", [state.status_of(b, e) for e in v["entry_id"]])
     v["reasons"] = v["reasons"].str.slice(0, 220)
+    for col in ("vendor_id", "created_by"):
+        v[col] = v[col].fillna("")
     return v
 
 

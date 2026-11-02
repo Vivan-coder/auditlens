@@ -201,9 +201,11 @@ def render(b: Bundle) -> None:
             "Period": e["period"],
             "Source": e["source"],
             "Created by": e["created_by"],
-            "Approved by": e["approved_by"] if isinstance(e["approved_by"], str) else "-",
-            "Vendor": e["vendor_id"] if isinstance(e["vendor_id"], str) else "-",
-            "Invoice number": e["invoice_number"] if isinstance(e["invoice_number"], str) else "-",
+            "Approved by": e["approved_by"] if isinstance(e["approved_by"], str) else "none",
+            "Vendor": e["vendor_id"] if isinstance(e["vendor_id"], str) else "none",
+            "Invoice number": e["invoice_number"]
+            if isinstance(e["invoice_number"], str)
+            else "none",
         }
         st.table(pd.Series(fields, name="Value").astype(str))
         st.subheader("Review")

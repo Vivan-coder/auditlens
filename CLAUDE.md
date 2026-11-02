@@ -11,7 +11,7 @@ KPMG Bahrain internship application. **All data is synthetic.** Free tools only,
 - [x] Phase 3: ML features, Isolation Forest, combined risk score (`src/auditlens/ml/`, `pipeline.py`)
 - [x] Phase 4: evaluation (`src/auditlens/evaluate.py`, `eval_report.py`, `eval_charts.py`)
 - [x] Phase 5: Streamlit dashboard (`app.py`, `dashboard/`, `schema.py`, `export.py`)
-- [ ] Phase 6: CI, README, methodology, deployment notes
+- [x] Phase 6: CI (`.github/workflows/ci.yml`), README, `docs/methodology.md`, `docs/deployment.md`
 
 ## Commands (Windows, repo root, venv active: `.venv\Scripts\activate`)
 
@@ -43,7 +43,7 @@ src/auditlens/
   evaluate.py            metrics vs labels.csv (entry level); eval_report.py / eval_charts.py render report + PNGs
 app.py                   Streamlit shell (sidebar radio nav; pages in dashboard/, each exposes render(bundle))
 dashboard/               state (Bundle, review status), style, overview, queue, detail, benford_page, evaluation_page, upload
-docs/                    data_dictionary.md, methodology.md (later), deployment notes (later)
+docs/                    data_dictionary.md, methodology.md, evaluation_report.md, deployment.md, images/
 tests/                   pytest
 data/, outputs/          generated, gitignored
 ```
@@ -96,7 +96,9 @@ ML weakness, small n). Do not tune thresholds against labels; if one changes, sa
 - Bahrain weekend is Friday/Saturday, not Saturday/Sunday.
 - Git: commit once per phase after tests pass, push to `origin main`. Commits carry only the user's
   identity (no co-author trailers).
-- Run `pytest` and `ruff check .` before every commit.
+- Run `pytest` and `ruff check .` before every commit (CI runs both on every push).
+- After changing generator, rules, ML or scoring, re-run `python -m auditlens.evaluate --publish-docs` and update
+  the results table in README.md so the published numbers match the code.
 - Tests that exercise one rule use tiny hand-built ledgers (`tests/helpers.py`), one planted case and one clean case.
 
 ## Domain notes

@@ -94,20 +94,19 @@ def render(b: Bundle) -> None:
     )
     s = _vendor_stats(inv.loc[inv["vendor_id"] == vendor, "amount"])
     fails = s["p"] < cfg.p_threshold and s["n"] >= cfg.min_invoices
-    verdict = (
-        "Deviates from Benford's Law"
-        if fails
-        else "Conforms"
-        if s["n"] >= cfg.min_invoices
-        else "Too few invoices: indicative only"
-    )
+    if fails:
+        verdict, note = "Deviates", "from Benford's Law"
+    elif s["n"] >= cfg.min_invoices:
+        verdict, note = "Conforms", "to Benford's Law"
+    else:
+        verdict, note = "Indicative", f"fewer than {cfg.min_invoices} invoices"
     style.kpi_row(
         [
             ("Invoices", f"{s['n']:,}", "amounts analysed"),
             ("Chi-square", f"{s['chi2']:.1f}", "8 degrees of freedom"),
             ("p-value", f"{s['p']:.2g}", f"flag below {cfg.p_threshold:g}"),
             ("Mean abs. deviation", f"{s['mad']:.3f}", "of digit shares"),
-            ("Result", verdict, ""),
+            ("Result", verdict, note),
         ]
     )
     style.show(digit_chart(s, f"Leading digits of invoice amounts: {vendor}"))
