@@ -145,6 +145,14 @@ class ScoringCfg(_Strict):
     queue_min_score: float = Field(ge=0)
 
 
+class EvaluationCfg(_Strict):
+    combined_threshold: float = Field(ge=0, le=100)
+    top_k: list[int]
+    curve_max_k: int = Field(gt=10)
+    stability_seeds: list[int]
+    assumed_real_prevalence: float = Field(gt=0, lt=1)
+
+
 class Config(_Strict):
     """Whole configuration file."""
 
@@ -157,6 +165,7 @@ class Config(_Strict):
     rules: RulesCfg
     ml: MLCfg
     scoring: ScoringCfg
+    evaluation: EvaluationCfg
 
 
 def load_config(path: Path | str | None = None) -> Config:

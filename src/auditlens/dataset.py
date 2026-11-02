@@ -112,6 +112,21 @@ class Dataset:
         return self.entries[self.entries["is_payment"]]
 
 
+def dataset_from_tables(tables: dict[str, pd.DataFrame], cfg: Config) -> Dataset:
+    """Dataset from in-memory generator output (no files), e.g. for multi-seed evaluation."""
+    changes = tables["vendor_bank_changes"].copy()
+    changes["change_date"] = pd.to_datetime(changes["change_date"])
+    return Dataset(
+        journal=tables["journal_entries"],
+        cfg=cfg,
+        vendors=tables["vendors"],
+        employees=tables["employees"],
+        users=tables["users"],
+        bank_changes=changes,
+        accounts=tables["chart_of_accounts"],
+    )
+
+
 def load_labels(data_dir: Path | str = DATA_DIR) -> pd.DataFrame:
     """Ground-truth labels. Only evaluation code and the Evaluation page may call this."""
     return pd.read_csv(Path(data_dir) / "labels.csv")

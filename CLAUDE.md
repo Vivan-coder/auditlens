@@ -9,7 +9,7 @@ KPMG Bahrain internship application. **All data is synthetic.** Free tools only,
 - [x] Phase 1: synthetic data generator, data dictionary, tests
 - [x] Phase 2: rule-based audit tests (`src/auditlens/rules/`)
 - [x] Phase 3: ML features, Isolation Forest, combined risk score (`src/auditlens/ml/`, `pipeline.py`)
-- [ ] Phase 4: evaluation (`src/auditlens/evaluate.py`)
+- [x] Phase 4: evaluation (`src/auditlens/evaluate.py`, `eval_report.py`, `eval_charts.py`)
 - [ ] Phase 5: Streamlit dashboard (`app.py`, `dashboard/`)
 - [ ] Phase 6: CI, README, methodology, deployment notes
 
@@ -19,7 +19,7 @@ KPMG Bahrain internship application. **All data is synthetic.** Free tools only,
 |------|---------|
 | Generate data | `python -m auditlens.generate` (`--seed N`, `--lines N`, `--out DIR`) |
 | Analyse (review queue) | `python -m auditlens.pipeline` |
-| Evaluate | `python -m auditlens.evaluate` |
+| Evaluate | `python -m auditlens.evaluate` (`--no-stability`, `--publish-docs` copies report+charts to docs/) |
 | Run app | `streamlit run app.py` |
 | Test | `pytest` |
 | Lint | `ruff check .` (format with `ruff format .`) |
@@ -38,7 +38,7 @@ src/auditlens/
   rules/                 one module per test family; each run(Dataset) -> flags table
   ml/                    features (no labels), Isolation Forest + explanations, risk score + review queue
   pipeline.py            analyse(Dataset) -> AnalysisResult (rules + ML + queue); CLI writes outputs/
-  evaluate.py            (Phase 4) metrics against labels.csv
+  evaluate.py            metrics vs labels.csv (entry level); eval_report.py / eval_charts.py render report + PNGs
 docs/                    data_dictionary.md, methodology.md (later), deployment notes (later)
 tests/                   pytest
 data/, outputs/          generated, gitignored
@@ -60,6 +60,14 @@ so an uploaded journal-only CSV still runs the rest.
 so several hits add up but saturate below 100. `ml_points` (0 to `ml_max_points`) go only to entries in the top
 `ml.flag_percentile` of Isolation Forest scores, so every queued entry has a reason. ML features exclude the rule
 signals (self-approval, near-limit, missing approver) so the model is an independent view.
+
+## Evaluation conventions
+
+Positive = any entry in labels.csv (including the genuine counterpart of a planted duplicate). Recall per type =
+share of that type's entries flagged at all. Precision per type for Rules/Combined counts only entries carrying a
+rule designed for that type (`TYPE_CODES` in evaluate.py); ML precision is its yield. Combined = risk >=
+`evaluation.combined_threshold`. The report must state weaknesses in numbers (circularity, unrealistic base rate,
+ML weakness, small n). Do not tune thresholds against labels; if one changes, say so in the report.
 
 ## Rules for working in this repo
 

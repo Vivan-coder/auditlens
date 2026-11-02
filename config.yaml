@@ -125,3 +125,11 @@ scoring:
   ml_max_points: 30            # the ML score can add at most this many points, and only to
                                # ML-flagged entries (top ml.flag_percentile of anomaly scores)
   queue_min_score: 1           # entries below this are not put in the review queue
+
+# ---- Phase 4: evaluation ------------------------------------------------------------------------
+evaluation:
+  combined_threshold: 20       # "Combined" flags entries with risk_score at or above this
+  top_k: [50, 100]             # auditor review capacity
+  curve_max_k: 500
+  stability_seeds: [1001, 1002, 1003, 1004]   # regenerate with these seeds to check robustness
+  assumed_real_prevalence: 0.001              # for the base-rate sensitivity note in the report
