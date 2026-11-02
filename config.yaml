@@ -136,3 +136,4 @@ evaluation:
   curve_max_k: 500
   stability_seeds: [1001, 1002, 1003, 1004]   # regenerate with these seeds to check robustness
   assumed_real_prevalence: 0.001              # for the base-rate sensitivity note in the report
+  challenge_seed: 2025                        # seed of the adversarial challenge ledger

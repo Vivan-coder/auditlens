@@ -157,6 +157,7 @@ class EvaluationCfg(_Strict):
     curve_max_k: int = Field(gt=10)
     stability_seeds: list[int]
     assumed_real_prevalence: float = Field(gt=0, lt=1)
+    challenge_seed: int
 
 
 class Config(_Strict):
