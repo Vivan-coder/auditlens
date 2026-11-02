@@ -44,7 +44,8 @@ src/auditlens/
   evaluate.py            metrics vs labels.csv (entry level); eval_report.py / eval_charts.py render report + PNGs
 app.py                   Streamlit shell (sidebar radio nav; pages in dashboard/, each exposes render(bundle))
 dashboard/               state (Bundle, review status), style, overview, queue, detail, benford_page, evaluation_page, upload
-docs/                    data_dictionary.md, methodology.md, evaluation_report.md, deployment.md, images/
+docs/                    data_dictionary.md, methodology.md, evaluation_report.md, challenge_report.md, STUDY_GUIDE.md/.html, deployment.md, images/
+scripts/                 build_study_guide.py (optional; needs `pip install markdown`)
 tests/                   pytest
 data/, outputs/          generated, gitignored
 ```

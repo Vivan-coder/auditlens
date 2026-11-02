@@ -67,6 +67,10 @@ generate.py ──► journal_entries.csv + master data      labels.csv (separat
    go to ML-flagged entries, so every queued entry has a reason.
 4. **Evaluation** compares flags to the planted labels at entry level.
 
+**New to the domain?** Start with the plain-language **[Study Guide](docs/STUDY_GUIDE.md)** (also as a printable
+[HTML version](docs/STUDY_GUIDE.html)): accounting basics, how and why every part works, worked examples with the real
+numbers, hands-on exercises and 30 interview questions with answers.
+
 Full detail, including why auditors care about each test: [docs/methodology.md](docs/methodology.md).
 Column-by-column description of the data: [docs/data_dictionary.md](docs/data_dictionary.md).
 
@@ -100,6 +104,12 @@ Recall by anomaly type (share of planted entries flagged):
 
 Across four additional datasets generated with different seeds the rules scored 84.9% ± 4.0% precision and
 100% recall, ML alone 13.9% ± 2.4% / 16.7% ± 2.8%, and the combined score 71.7% ± 1.3% / 83.7% ± 1.0%.
+
+**Stress test.** Because the main test is circular, a second adversarial ledger ([docs/challenge_report.md](docs/challenge_report.md))
+plants boundary cases just outside each threshold, disguised cases, controls and legitimate look-alikes. Result: the
+controls are caught 100%, but boundary cases only 3% by their intended rule (thresholds can be avoided); ML alone
+catches the journals just under materiality; every legitimate look-alike reaches the queue. Run it with
+`python -m auditlens.challenge_eval`.
 
 **How to read these numbers honestly.** They flatter the system, and the report says why:
 
@@ -176,9 +186,11 @@ src/auditlens/
   ml/                      features, Isolation Forest, risk score
   pipeline.py              rules + ML + queue in one call
   evaluate.py              metrics against labels.csv (+ eval_report.py, eval_charts.py)
+  challenge.py             adversarial challenge ledger (+ challenge_eval.py report)
   schema.py, export.py     CSV validation (pydantic) and Excel workpaper (openpyxl)
 docs/                      data dictionary, methodology, evaluation report, deployment notes
-tests/                     pytest suite (generator, every rule, scoring, evaluation, validator, app pages)
+tests/                     162 pytest tests (generator, every rule, scoring, evaluation, validator, challenge set, app pages)
+scripts/                   optional developer tools (build the HTML study guide)
 ```
 
 ## Tech

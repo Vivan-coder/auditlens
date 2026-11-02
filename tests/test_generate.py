@@ -7,7 +7,7 @@ import pandas as pd
 from scipy import stats
 
 from auditlens import bh_calendar as cal
-from auditlens.config import load_config
+from auditlens.config import DEFAULT_CONFIG_PATH, load_config
 from auditlens.generate import JOURNAL_COLUMNS, generate
 from conftest import small_cfg
 
@@ -256,6 +256,7 @@ def test_config_rejects_unknown_keys(tmp_path):
     from pydantic import ValidationError
 
     bad = tmp_path / "bad.yaml"
-    bad.write_text(open(load_config.__globals__["DEFAULT_CONFIG_PATH"]).read() + "\nbogus: 1\n")
+    original = DEFAULT_CONFIG_PATH.read_text(encoding="utf-8")
+    bad.write_text(original + "\nbogus: 1\n", encoding="utf-8")
     with pytest.raises(ValidationError):
         load_config(bad)

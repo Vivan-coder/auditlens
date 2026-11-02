@@ -1,0 +1,2235 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>AuditLens Study Guide</title><style>
+body{font-family:'Segoe UI',Calibri,Arial,sans-serif;line-height:1.55;color:#14181f;max-width:980px;
+margin:2rem auto;padding:0 1.2rem;}
+h1{color:#1f3a5f;border-bottom:3px solid #1f3a5f;padding-bottom:.3rem;margin-top:2.4rem;}
+h2{color:#1f3a5f;margin-top:1.8rem;border-bottom:1px solid #d6dbe3;padding-bottom:.2rem;}
+h3{color:#2b5486;}
+table{border-collapse:collapse;margin:1rem 0;width:100%;font-size:.92rem;}
+th{background:#1f3a5f;color:#fff;text-align:left;padding:.45rem .6rem;}
+td{border:1px solid #d6dbe3;padding:.4rem .6rem;vertical-align:top;}
+tr:nth-child(even) td{background:#f6f8fb;}
+code{background:#eef1f6;padding:.1rem .3rem;border-radius:3px;font-size:.9em;}
+pre{background:#f3f5f9;border:1px solid #d6dbe3;border-radius:6px;padding:.8rem 1rem;
+overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{border-left:4px solid #2a78d6;background:#eef4fc;margin:1rem 0;padding:.5rem 1rem;}
+hr{border:none;border-top:1px solid #d6dbe3;margin:2rem 0;}
+.toc{background:#f6f8fb;border:1px solid #d6dbe3;border-radius:8px;padding:.5rem 1.2rem;}
+@media print{body{max-width:none;margin:0} h1{page-break-before:always}
+h1:first-of-type{page-break-before:avoid}
+pre,table{page-break-inside:avoid}}
+</style></head><body><div class="toc"><b>Quick navigation</b><div class="toc">
+<ul>
+<li><a href="#auditlens-study-guide">AuditLens Study Guide</a></li>
+<li><a href="#1-accounting-and-audit-background">1. Accounting and audit background</a><ul>
+<li><a href="#11-the-general-ledger-and-journal-entries">1.1 The general ledger and journal entries</a></li>
+<li><a href="#12-fields-that-matter-for-audit">1.2 Fields that matter for audit</a></li>
+<li><a href="#13-what-auditors-do-with-journal-entries">1.3 What auditors do with journal entries</a></li>
+<li><a href="#14-the-key-idea-to-keep-repeating">1.4 The key idea to keep repeating</a></li>
+</ul>
+</li>
+<li><a href="#2-the-big-picture-how-auditlens-works-end-to-end">2. The big picture: how AuditLens works end to end</a><ul>
+<li><a href="#21-the-pipeline">2.1 The pipeline</a></li>
+<li><a href="#22-file-map-where-to-look">2.2 File map (where to look)</a></li>
+<li><a href="#23-the-two-minute-explanation-memorise-the-shape-not-the-words">2.3 The two-minute explanation (memorise the shape, not the words)</a></li>
+</ul>
+</li>
+<li><a href="#3-the-data-how-the-synthetic-ledger-is-built-and-why">3. The data: how the synthetic ledger is built and why</a><ul>
+<li><a href="#31-why-synthetic-data-at-all">3.1 Why synthetic data at all?</a></li>
+<li><a href="#32-how-the-generator-is-organised">3.2 How the generator is organised</a></li>
+<li><a href="#33-the-clean-baseline-what-normal-looks-like">3.3 The clean baseline (what "normal" looks like)</a></li>
+<li><a href="#34-why-amounts-follow-benfords-law-the-one-clever-trick">3.4 Why amounts follow Benford's Law (the one clever trick)</a></li>
+<li><a href="#35-master-data">3.5 Master data</a></li>
+<li><a href="#36-the-twelve-planted-anomaly-types">3.6 The twelve planted anomaly types</a></li>
+<li><a href="#37-check-your-understanding">3.7 Check your understanding</a></li>
+</ul>
+</li>
+<li><a href="#4-the-audit-tests-rules-one-by-one">4. The audit tests (rules): one by one</a><ul>
+<li><a href="#41-how-every-rule-is-built-the-common-pattern">4.1 How every rule is built (the common pattern)</a></li>
+<li><a href="#42-duplicate-payments-rulesduplicatespy">4.2 Duplicate payments (rules/duplicates.py)</a></li>
+<li><a href="#43-approval-and-segregation-of-duties-rulesapprovalpy">4.3 Approval and segregation of duties (rules/approval.py)</a></li>
+<li><a href="#44-timing-rulestimingpy">4.4 Timing (rules/timing.py)</a></li>
+<li><a href="#45-amounts-rulesamountspy">4.5 Amounts (rules/amounts.py)</a></li>
+<li><a href="#46-vendor-master-data-rulesvendorspy">4.6 Vendor master data (rules/vendors.py)</a></li>
+<li><a href="#47-invoice-number-sequences-rulessequencepy">4.7 Invoice-number sequences (rules/sequence.py)</a></li>
+<li><a href="#48-account-usage-rulespairingspy">4.8 Account usage (rules/pairings.py)</a></li>
+<li><a href="#49-summary-of-weights">4.9 Summary of weights</a></li>
+</ul>
+</li>
+<li><a href="#5-benfords-law-in-depth">5. Benford's Law in depth</a><ul>
+<li><a href="#51-the-idea">5.1 The idea</a></li>
+<li><a href="#52-when-it-does-not-apply-say-this-unprompted-in-an-interview">5.2 When it does NOT apply (say this unprompted in an interview)</a></li>
+<li><a href="#53-the-test-chi-square-goodness-of-fit">5.3 The test: chi-square goodness of fit</a></li>
+<li><a href="#54-worked-example-the-planted-vendor-v0122-real-numbers">5.4 Worked example: the planted vendor V0122 (real numbers)</a></li>
+<li><a href="#55-multiple-testing-the-subtle-point">5.5 Multiple testing (the subtle point)</a></li>
+<li><a href="#56-in-the-code">5.6 In the code</a></li>
+</ul>
+</li>
+<li><a href="#6-the-machine-learning-layer">6. The machine learning layer</a><ul>
+<li><a href="#61-why-add-ml-to-a-rules-based-tool">6.1 Why add ML to a rules-based tool?</a></li>
+<li><a href="#62-isolation-forest-the-intuition">6.2 Isolation Forest: the intuition</a></li>
+<li><a href="#63-the-20-features-mlfeaturespy">6.3 The 20 features (ml/features.py)</a></li>
+<li><a href="#64-explaining-an-ml-flag-in-plain-language">6.4 Explaining an ML flag in plain language</a></li>
+<li><a href="#65-how-good-is-it-the-honest-answer">6.5 How good is it? (the honest answer)</a></li>
+</ul>
+</li>
+<li><a href="#7-the-risk-score-and-the-review-queue">7. The risk score and the review queue</a><ul>
+<li><a href="#71-why-combine-at-all">7.1 Why combine at all?</a></li>
+<li><a href="#72-rule-evidence-the-noisy-or">7.2 Rule evidence: the noisy-OR</a></li>
+<li><a href="#73-the-weights-judgement-not-fitted">7.3 The weights (judgement, not fitted)</a></li>
+<li><a href="#74-ml-points">7.4 ML points</a></li>
+<li><a href="#75-tiers-and-the-queue">7.5 Tiers and the queue</a></li>
+<li><a href="#76-the-executive-summary-summarypy">7.6 The executive summary (summary.py)</a></li>
+</ul>
+</li>
+<li><a href="#8-evaluation-how-we-know-whether-it-works">8. Evaluation: how we know whether it works</a><ul>
+<li><a href="#81-the-setup">8.1 The setup</a></li>
+<li><a href="#82-the-metrics-with-the-real-numbers">8.2 The metrics, with the real numbers</a></li>
+<li><a href="#83-per-type-metrics-and-how-they-are-defined">8.3 Per-type metrics and how they are defined</a></li>
+<li><a href="#84-precision-at-k-the-auditor-capacity-view">8.4 Precision at K (the auditor-capacity view)</a></li>
+<li><a href="#85-the-base-rate-problem-the-most-important-caveat">8.5 The base-rate problem (the most important caveat)</a></li>
+<li><a href="#86-stability-across-seeds-and-the-threshold-choice">8.6 Stability across seeds and the threshold choice</a></li>
+<li><a href="#87-the-challenge-set-breaking-our-own-system">8.7 The challenge set (breaking our own system)</a></li>
+<li><a href="#88-in-the-code">8.8 In the code</a></li>
+</ul>
+</li>
+<li><a href="#9-the-dashboard-the-upload-pipeline-and-the-excel-workpaper">9. The dashboard, the upload pipeline and the Excel workpaper</a><ul>
+<li><a href="#91-app-structure-streamlit">9.1 App structure (Streamlit)</a></li>
+<li><a href="#92-the-pages">9.2 The pages</a></li>
+<li><a href="#93-the-upload-pipeline-schemapy-dashboarduploadpy">9.3 The upload pipeline (schema.py, dashboard/upload.py)</a></li>
+<li><a href="#94-the-excel-workpaper-exportpy">9.4 The Excel workpaper (export.py)</a></li>
+<li><a href="#95-a-real-bug-story-worth-telling">9.5 A real bug story worth telling</a></li>
+</ul>
+</li>
+<li><a href="#10-engineering-config-tests-ci-and-hands-on-exercises">10. Engineering: config, tests, CI, and hands-on exercises</a><ul>
+<li><a href="#101-configyaml-the-control-panel">10.1 config.yaml: the control panel</a></li>
+<li><a href="#102-the-test-suite-162-tests">10.2 The test suite (162 tests)</a></li>
+<li><a href="#103-quality-gates">10.3 Quality gates</a></li>
+<li><a href="#104-commands-windows-command-prompt-from-the-project-folder">10.4 Commands (Windows Command Prompt, from the project folder)</a></li>
+<li><a href="#105-hands-on-exercises-do-these-they-teach-more-than-reading">10.5 Hands-on exercises (do these; they teach more than reading)</a></li>
+</ul>
+</li>
+<li><a href="#11-design-decisions-and-trade-offs-why-this-and-not-that">11. Design decisions and trade-offs ("why this and not that")</a></li>
+<li><a href="#12-interview-preparation-30-questions-with-answers">12. Interview preparation: 30 questions with answers</a></li>
+<li><a href="#13-glossary-and-quick-reference">13. Glossary and quick reference</a><ul>
+<li><a href="#131-glossary">13.1 Glossary</a></li>
+<li><a href="#132-numbers-to-know-cold">13.2 Numbers to know cold</a></li>
+<li><a href="#133-key-thresholds-all-in-configyaml">13.3 Key thresholds (all in config.yaml)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div><h1 id="auditlens-study-guide">AuditLens Study Guide</h1>
+<p><em>How and why everything in this project works, written so you can explain and defend every part.</em></p>
+<p>How to use this guide: read Parts 1 and 2 once straight through. After that, use the later parts as
+reference before an interview, and do the hands-on exercises in Part 10, because changing something and
+watching the result is the fastest way to really understand it. Every number quoted here was taken from the
+real project output (seed 42), and every file and function name exists in the repository.</p>
+<p><strong>Contents</strong></p>
+<ol>
+<li>Accounting and audit background (what problem this solves)</li>
+<li>The big picture: how AuditLens works end to end</li>
+<li>The data: how the synthetic ledger is built and why</li>
+<li>The audit tests (rules): one by one</li>
+<li>Benford's Law in depth</li>
+<li>The machine learning layer</li>
+<li>The risk score and the review queue</li>
+<li>Evaluation: how we know whether it works</li>
+<li>The dashboard, the upload pipeline and the Excel workpaper</li>
+<li>Engineering: config, tests, CI, and hands-on exercises</li>
+<li>Design decisions and trade-offs ("why this and not that")</li>
+<li>Interview preparation: 30 questions with answers</li>
+<li>Glossary and quick reference</li>
+</ol>
+<hr />
+<h1 id="1-accounting-and-audit-background">1. Accounting and audit background</h1>
+<p>You do not need to be an accountant to understand this project, but you need these ideas to explain it.</p>
+<h2 id="11-the-general-ledger-and-journal-entries">1.1 The general ledger and journal entries</h2>
+<p>A company records every financial event in its <strong>general ledger (GL)</strong>. Each event is a <strong>journal entry</strong>,
+made of two or more <strong>lines</strong>. Each line debits or credits an <strong>account</strong> from the <strong>chart of accounts</strong>
+(a numbered list such as 1000 Cash, 2000 Accounts Payable, 6300 Professional Fees).</p>
+<p>The one rule that makes the whole system checkable: <strong>in every entry, total debits equal total credits.</strong>
+That is why the generator and the CSV validator both test that entries balance.</p>
+<p>Worked example. The company receives a consultant's invoice for 1,500 BHD:</p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Account</th>
+<th>Debit</th>
+<th>Credit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>6300 Professional Fees (an expense)</td>
+<td>1,500.000</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>2000 Accounts Payable (what we owe)</td>
+<td></td>
+<td>1,500.000</td>
+</tr>
+</tbody>
+</table>
+<p>Thirty days later the company pays it:</p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Account</th>
+<th>Debit</th>
+<th>Credit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2000 Accounts Payable (debt cleared)</td>
+<td>1,500.000</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>1000 Cash at Bank (cash goes out)</td>
+<td></td>
+<td>1,500.000</td>
+</tr>
+</tbody>
+</table>
+<p>This is exactly how <code>invoice</code> and <code>payment</code> entries are built in <code>synth/context.py</code>
+(<code>make_invoice</code>, <code>make_payment</code>). The code recognises them later purely from the accounts: an <strong>invoice</strong>
+credits Accounts Payable (2000); a <strong>payment</strong> debits 2000 and credits Cash (1000). The account numbers are
+in <code>config.yaml</code> under <code>accounts:</code> so another company's chart of accounts can be used.</p>
+<p>In this project one journal <strong>line</strong> is a row in <code>journal_entries.csv</code>, and one <strong>entry</strong> is all rows sharing
+an <code>entry_id</code>. About 49,464 lines make 24,714 entries; most entries have two lines, and the 12 monthly payroll
+entries have five.</p>
+<h2 id="12-fields-that-matter-for-audit">1.2 Fields that matter for audit</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+<th>Why an auditor looks at it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>document_date</code></td>
+<td>Date on the source document (invoice date)</td>
+<td>Compare with posting date to spot backdating</td>
+</tr>
+<tr>
+<td><code>posting_date</code></td>
+<td>When it was recorded in the ledger</td>
+<td>Weekends, holidays, late postings</td>
+</tr>
+<tr>
+<td><code>period</code></td>
+<td>Accounting month the entry belongs to (<code>2025-03</code>)</td>
+<td>Entries into closed periods</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td><code>manual</code> (a person keyed it) or <code>automated</code> (system)</td>
+<td>Manual entries carry more override risk</td>
+</tr>
+<tr>
+<td><code>created_by</code>, <code>approved_by</code></td>
+<td>Who made it, who approved it</td>
+<td>Segregation of duties</td>
+</tr>
+<tr>
+<td><code>vendor_id</code>, <code>invoice_number</code></td>
+<td>Supplier and its document number</td>
+<td>Duplicates, sequences, ghost vendors</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Approval limits.</strong> Staff can only approve up to a limit tied to their role. In this project:
+accountant 25,000; senior accountant 100,000; financial controller 500,000; CFO 5,000,000; AP clerks
+cannot approve. The generator always picks the <em>lowest-limit user who outranks the creator and can cover the
+amount</em> (<code>GenContext.approver_for</code>), so clean data never breaks the hierarchy.</p>
+<p><strong>Period close.</strong> Each month is "closed" 5 days after month end (<code>calendar.period_close_days</code>); after that,
+postings to that month are suspicious. March 2025 closes on 5 April 2025.</p>
+<p><strong>Bahrain context.</strong> The weekend is <strong>Friday and Saturday</strong>, not Saturday and Sunday. Public holidays come
+from the <code>holidays</code> library's Bahrain calendar. The currency is the Bahraini dinar (BHD), which has 3 decimal
+places (fils), so amounts look like <code>1,500.000</code>. This is handled in <code>bh_calendar.py</code>, and it is a detail that
+shows you thought about the local context.</p>
+<h2 id="13-what-auditors-do-with-journal-entries">1.3 What auditors do with journal entries</h2>
+<p>Auditing standards (ISA 240, on the auditor's responsibilities relating to fraud) require auditors to test
+journal entries and other adjustments, because <strong>management can override controls</strong> by posting unusual entries.
+The traditional approach is to pick a sample by hand. With tens of thousands of entries, that is slow and
+misses things. <strong>Journal entry analytics</strong> means testing the whole population with computer tests that mirror
+what an auditor would look for, then reviewing the exceptions.</p>
+<p>Typical risk indicators (all implemented here): duplicate payments, payments or purchases arranged to sit just
+below an approval limit, entries on weekends and holidays, round amounts, the same person creating and
+approving, entries into closed periods or backdated, vendors that share details with employees, vendor bank
+changes before large payments, gaps in invoice numbers, unusual account combinations, amounts that violate
+Benford's Law, and large manual entries near period end.</p>
+<h2 id="14-the-key-idea-to-keep-repeating">1.4 The key idea to keep repeating</h2>
+<blockquote>
+<p>A flag is a <strong>lead, not a finding.</strong> The system narrows 24,714 entries to a ranked list with reasons; an
+auditor still gathers evidence and uses judgement.</p>
+</blockquote>
+<p>This phrase appears in the app, the Excel cover sheet and the README on purpose. Using it shows you
+understand the limits of analytics in an audit.</p>
+<hr />
+<h1 id="2-the-big-picture-how-auditlens-works-end-to-end">2. The big picture: how AuditLens works end to end</h1>
+<h2 id="21-the-pipeline">2.1 The pipeline</h2>
+<pre><code> config.yaml  (every threshold, weight, limit)
+      │
+      ▼
+ generate.py ── synth/*  ──►  data/journal_entries.csv      (what the tests see)
+                          ──►  data/vendors, employees, users, bank changes, accounts
+                          ──►  data/labels.csv               (ground truth, evaluation ONLY)
+      │
+      ▼
+ dataset.py   Dataset: journal lines + one-row-per-entry view
+      │
+      ├──► rules/  (8 families, 23 codes)  ──► flags (entry, code, plain-English reason)
+      │
+      ├──► ml/features.py ──► ml/model.py (Isolation Forest) ──► ML score + ML flags with reasons
+      │
+      ▼
+ ml/scoring.py   risk = min(100, noisy-OR(rule weights) + ML points)  →  ranked review queue
+      │
+      ├──► summary.py   executive summary, tiers, suggested procedures
+      ├──► dashboard/ (Streamlit)   +   export.py (Excel workpaper)
+      │
+      ▼
+ evaluate.py  compares flags with labels.csv  →  precision, recall, F1, P@K, report, charts
+ challenge.py / challenge_eval.py  harder, adversarial test of the same system
+</code></pre>
+<h2 id="22-file-map-where-to-look">2.2 File map (where to look)</h2>
+<table>
+<thead>
+<tr>
+<th>File or folder</th>
+<th>What it does</th>
+<th>Key names</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config.yaml</code>, <code>config.py</code></td>
+<td>All settings; validated by pydantic so typos fail early</td>
+<td><code>load_config</code>, <code>get_config</code></td>
+</tr>
+<tr>
+<td><code>bh_calendar.py</code></td>
+<td>Fri/Sat weekend, Bahrain holidays, period close dates</td>
+<td><code>is_business_day</code>, <code>period_close_date</code></td>
+</tr>
+<tr>
+<td><code>generate.py</code>, <code>synth/</code></td>
+<td>Builds the synthetic ledger and plants anomalies</td>
+<td><code>generate</code>, <code>GenContext</code>, <code>inject_*</code></td>
+</tr>
+<tr>
+<td><code>dataset.py</code></td>
+<td>Loads data; builds the entry-level table</td>
+<td><code>Dataset</code>, <code>build_entries</code></td>
+</tr>
+<tr>
+<td><code>rules/</code></td>
+<td>One module per test family</td>
+<td><code>run_all_rules</code>, <code>RULE_CODES</code></td>
+</tr>
+<tr>
+<td><code>ml/features.py</code></td>
+<td>20 numeric features per entry</td>
+<td><code>build_features</code></td>
+</tr>
+<tr>
+<td><code>ml/model.py</code></td>
+<td>Isolation Forest + explanations</td>
+<td><code>score_entries</code>, <code>ml_flags</code>, <code>explain</code></td>
+</tr>
+<tr>
+<td><code>ml/scoring.py</code></td>
+<td>Risk score, tiers, review queue</td>
+<td><code>rule_score</code>, <code>ml_points</code>, <code>build_review_queue</code></td>
+</tr>
+<tr>
+<td><code>pipeline.py</code></td>
+<td>One call that runs everything</td>
+<td><code>analyse</code>, <code>AnalysisResult</code></td>
+</tr>
+<tr>
+<td><code>summary.py</code></td>
+<td>Executive summary and finding themes</td>
+<td><code>headline</code>, <code>themes</code>, <code>split_attention</code></td>
+</tr>
+<tr>
+<td><code>evaluate.py</code> (+ <code>eval_report.py</code>, <code>eval_charts.py</code>)</td>
+<td>Metrics against labels</td>
+<td><code>evaluate_result</code></td>
+</tr>
+<tr>
+<td><code>challenge.py</code>, <code>challenge_eval.py</code></td>
+<td>Adversarial test ledger and its report</td>
+<td><code>build_challenge</code></td>
+</tr>
+<tr>
+<td><code>schema.py</code></td>
+<td>Upload validation (pydantic)</td>
+<td><code>validate_journal</code>, <code>strict_dates</code></td>
+</tr>
+<tr>
+<td><code>export.py</code></td>
+<td>Excel workpaper</td>
+<td><code>build_workpaper</code></td>
+</tr>
+<tr>
+<td><code>app.py</code>, <code>dashboard/</code></td>
+<td>The web app</td>
+<td><code>main</code>, <code>render(bundle)</code> per page</td>
+</tr>
+<tr>
+<td><code>tests/</code></td>
+<td>The automated test suite</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="23-the-two-minute-explanation-memorise-the-shape-not-the-words">2.3 The two-minute explanation (memorise the shape, not the words)</h2>
+<p>"AuditLens is a journal-entry analytics tool. Auditors have to look for fraud and error in tens of thousands
+of ledger entries, which is impossible by hand, so I built something that tests the whole ledger.
+There are 23 rule-based audit tests in eight families, such as duplicate payments, split purchases just under
+approval limits, weekend and holiday postings, and vendors that share a bank account with an employee. On top
+of that an unsupervised Isolation Forest scores how statistically unusual each entry is. I combine them into a
+risk score and a ranked review queue, and every flag comes with a plain-English reason. Because I had no real
+client data, I generated a realistic synthetic ledger for a fictional Bahraini company and planted twelve kinds
+of known anomalies, kept in a separate label file, so I could measure precision and recall honestly. The rules
+caught everything they were designed for, but I also built an adversarial challenge set and I am upfront about
+the limits: threshold-based rules miss cases just outside their thresholds, and the ML model alone is only
+about 13% precise. It is a screening tool that gives an auditor a ranked list of leads with reasons."</p>
+<p>Then pause. They will ask a follow-up; the rest of this guide prepares you for those.</p>
+<hr />
+<h1 id="3-the-data-how-the-synthetic-ledger-is-built-and-why">3. The data: how the synthetic ledger is built and why</h1>
+<h2 id="31-why-synthetic-data-at-all">3.1 Why synthetic data at all?</h2>
+<p>Real general ledgers are confidential and I have no access to client data. More importantly, <strong>real data
+has no answer key</strong>: you never know which entries are truly fraudulent, so you cannot measure whether a
+detector works. A synthetic ledger lets me plant anomalies I know about and then check how many the system
+finds. The price is that the result only proves the system works on data like mine (see Part 8 for how
+honestly that is handled).</p>
+<p>Everything is <strong>reproducible</strong>: <code>generation.seed: 42</code> in <code>config.yaml</code> feeds one NumPy random generator and one
+Faker generator, and no other randomness is used. The same seed always produces byte-identical data (a test
+checks this).</p>
+<h2 id="32-how-the-generator-is-organised">3.2 How the generator is organised</h2>
+<p><code>generate.py</code> is a thin orchestrator. The real work is in <code>synth/</code>:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>master_data.py</code></td>
+<td>Chart of accounts, users and roles, 110 regular vendors in 7 categories, 8 recurring vendors, 60 employees, and a few legitimate vendor bank changes</td>
+</tr>
+<tr>
+<td><code>context.py</code></td>
+<td><code>GenContext</code>: shared state (random generator, entries, labels) and helpers such as <code>approver_for</code>, <code>sample_dates</code>, <code>resolve_dates</code>, <code>make_invoice</code>, <code>make_payment</code>, <code>make_journal</code></td>
+</tr>
+<tr>
+<td><code>baseline.py</code></td>
+<td>All the clean, normal activity</td>
+</tr>
+<tr>
+<td><code>inject_amounts.py</code>, <code>inject_timing.py</code>, <code>inject_vendors.py</code>, <code>inject_accounts.py</code></td>
+<td>One injector per anomaly type</td>
+</tr>
+</tbody>
+</table>
+<p>Order of work: build the <strong>clean baseline first</strong>, then <strong>plant anomalies on top</strong>, then number the entries and
+write files. Labels are collected in a list while planting and written to a separate <code>labels.csv</code>.</p>
+<h2 id="33-the-clean-baseline-what-normal-looks-like">3.3 The clean baseline (what "normal" looks like)</h2>
+<table>
+<thead>
+<tr>
+<th>Activity</th>
+<th>Entries (approx.)</th>
+<th>Accounting</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sales invoices</td>
+<td>5,000</td>
+<td>Dr 1100 Receivables / Cr 4000 or 4100 Revenue</td>
+<td>Automated; sequential numbers <code>SI-000001...</code></td>
+</tr>
+<tr>
+<td>Customer receipts</td>
+<td>up to 94% of sales (those due before year end)</td>
+<td>Dr 1000 Cash / Cr 1100</td>
+<td>Paid 5-120 days later (average 35); 70% automated</td>
+</tr>
+<tr>
+<td>Vendor invoices</td>
+<td>~7,700 + 96 recurring</td>
+<td>Dr expense (by vendor category) / Cr 2000</td>
+<td>70% manual (keyed by the vendor's AP clerk), 30% automated</td>
+</tr>
+<tr>
+<td>Vendor payments</td>
+<td>one per invoice due before year end</td>
+<td>Dr 2000 / Cr 1000</td>
+<td>Manual; paid at the vendor's terms (30/45/60 days) with a few days' jitter</td>
+</tr>
+<tr>
+<td>Payroll</td>
+<td>12</td>
+<td>Dr 6000 (one line per department) / Cr 1000</td>
+<td>Automated, last day of the month</td>
+</tr>
+<tr>
+<td>Depreciation</td>
+<td>12</td>
+<td>Dr 6900 / Cr 1590</td>
+<td>Automated, 18,250.500 each month</td>
+</tr>
+<tr>
+<td>Accruals and reversals</td>
+<td>~380 accruals + reversals on the next month's first business day</td>
+<td>Dr expense / Cr 2100, then the reverse</td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>Reclassifications</td>
+<td>~140</td>
+<td>Dr one expense / Cr another, from three fixed pairs</td>
+<td>Manual</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Realism features, and why each exists</strong></p>
+<ul>
+<li><strong>Month-end spike.</strong> <code>sample_dates</code> gives the last three business days of each month a weight of 2.6 and the
+  first business day 1.4, so volume surges at close, as in real ledgers.</li>
+<li><strong>Seasonality.</strong> Monthly weights in <code>config.yaml</code> (<code>sales_seasonality</code>, <code>purchase_seasonality</code>): a dip in March
+  (Ramadan), a strong Q4.</li>
+<li><strong>Recurring vendors.</strong> Rent (a constant 4,500.000), electricity, telecom, cleaning, security, software and
+  insurance (quarterly) bill on a schedule. This matters because a <em>contract</em> amount repeating is normal, and
+  the round-amount test must not flag it.</li>
+<li><strong>Business-day logic.</strong> Documents are dated on business days (Sunday to Thursday, not holidays). Manual
+  entries are posted 0-3 days later (probabilities 55%, 25%, 12%, 8%) and rolled to the next business day.
+  Automated month-end entries (payroll, depreciation) can fall on a weekend, which is realistic and is why the
+  weekend test applies only to manual entries.</li>
+<li><strong>Posting period rule</strong> (<code>GenContext.resolve_dates</code>). An entry belongs to its <em>document</em> month if it is posted
+  within the close window; otherwise to the <em>posting</em> month. So a 31 March invoice posted on 2 April still
+  belongs to March (inside the 5-day close window), and clean data never trips the post-close test.</li>
+<li><strong>Vendor numbering.</strong> Each vendor's invoices get increasing numbers (<code>INV-000123</code>) rising by 5-15 each time,
+  as the vendor has other customers. <code>invoice_number_for</code> finds the right number for a date. If injected
+  invoices use up a gap, <code>shift_invoice_numbers</code> moves later numbers up (see the bug story in Part 11).</li>
+</ul>
+<h2 id="34-why-amounts-follow-benfords-law-the-one-clever-trick">3.4 Why amounts follow Benford's Law (the one clever trick)</h2>
+<p>Benford's Law says the leading digit <em>d</em> of many real-world amounts appears with probability log10(1 + 1/d).
+To generate normal amounts that follow it <strong>exactly</strong>, the generator uses:</p>
+<blockquote>
+<p>amount = 10^(d + u), where d is a whole number (an order of magnitude) and u is uniform between 0 and 1.</p>
+</blockquote>
+<p>The first digit of an amount depends only on the fractional part of its log10, which is <code>u</code>. If <code>u</code> is
+uniform, the first digit is exactly Benford-distributed, whatever mix of orders of magnitude <code>d</code> you choose. So
+each vendor category has its own mix (goods suppliers 100-100,000; office supplies 10-10,000 and so on) but all
+conform. Test: the clean invoices pass a chi-square Benford test (p about 0.11). The 3-decimal rounding does not
+disturb it.</p>
+<h2 id="35-master-data">3.5 Master data</h2>
+<ul>
+<li><strong>Users</strong> come from <code>config.yaml</code> roles: 3 AP clerks, 3 accountants, 2 senior accountants, 1 financial controller,
+  1 CFO, plus a <code>SYSTEM</code> user for automated postings.</li>
+<li><strong>AP clerk portfolios.</strong> Each vendor category belongs to one clerk (clerk 0: goods and office supplies; clerk 1:
+  professional services, marketing, IT; clerk 2: travel, repairs and the recurring vendors). So a clerk's pattern
+  of accounts is stable, which is what makes "rare user-account" detection meaningful.</li>
+<li><strong>Vendors and employees</strong> have Bahrain-style addresses and IBAN-shaped bank accounts (<code>BH</code> + 2 digits + 4 bank
+  letters + 14 digits; the check digits are not real).</li>
+<li>10% of vendors are onboarded during the year; they never invoice before they exist.</li>
+<li>Three vendors have <strong>legitimate</strong> bank-account changes, so a bank change by itself is not suspicious.</li>
+</ul>
+<h2 id="36-the-twelve-planted-anomaly-types">3.6 The twelve planted anomaly types</h2>
+<p>Counts come from <code>config.yaml</code> (<code>anomalies:</code>). Each planted entry is otherwise ordinary (valid approver,
+business-day posting, normal lag) so that the <em>intended</em> test, and ideally only that test, should catch it.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Type (<code>anomaly_type</code>)</th>
+<th>What is planted</th>
+<th>Entries labelled (seed 42)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>duplicate_payment</code></td>
+<td>25 payments cloned 1-3 business days later, same or within 0.5% amount; invoice number repeated, suffixed <code>-R</code>, or brand new (one third each)</td>
+<td>50 (the duplicate and its original)</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>split_purchase</code></td>
+<td>12 groups of 3-5 invoices at 90-99.5% of a limit, same vendor and clerk, within a few days</td>
+<td>45</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>weekend_holiday_posting</code></td>
+<td>30 manual invoices on Friday/Saturday (two thirds) or a weekday public holiday (one third)</td>
+<td>30</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>round_amount</code></td>
+<td>30 manual invoices for exact multiples of 10,000</td>
+<td>30</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>same_creator_approver</code></td>
+<td>30 manual journals approved by their own creator</td>
+<td>30</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>late_or_backdated_posting</code></td>
+<td>15 posted after the period closed; 15 posted 45-150 days after the document date</td>
+<td>30</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>ghost_vendor</code></td>
+<td>2 vendors sharing a bank account and 1 sharing an address with an employee, each with 8 invoices and payments</td>
+<td>48</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>bank_change_large_payment</code></td>
+<td>8 vendors: bank account changed, then a 40,000-95,000 payment 1-5 days later</td>
+<td>8</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>invoice_sequence_break</code></td>
+<td>10 numbering gaps (jump 80-400) and 10 out-of-order numbers</td>
+<td>20</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>unusual_account_use</code></td>
+<td>24 journals using 8 account pairs never otherwise seen; 25 clerk invoices to accounts outside their portfolio</td>
+<td>49</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>benford_violation</code></td>
+<td>One vendor with 60 invoices uniform between 7,000 and 9,990 (leading digits 7, 8, 9 only)</td>
+<td>60</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>large_manual_period_end</code></td>
+<td>12 manual journals of 260,000-900,000 in the last two business days of a month (materiality is 250,000)</td>
+<td>12</td>
+</tr>
+</tbody>
+</table>
+<p>Total: <strong>412 labelled entries out of 24,714 (1.7%)</strong>.</p>
+<p><strong><code>labels.csv</code></strong> has <code>entry_id</code>, <code>anomaly_type</code>, <code>role</code> (<code>injected</code>, or <code>counterpart</code> for the genuine original of a
+duplicated payment), <code>related_entry_id</code> and a human <code>note</code>. It is a <strong>separate file</strong>, and <code>rules/</code> and <code>ml/</code> never
+read it (a test scans their source for <code>load_labels</code>). That separation is the foundation of an honest evaluation:
+if labels leaked into the detectors, the results would be meaningless.</p>
+<h2 id="37-check-your-understanding">3.7 Check your understanding</h2>
+<ol>
+<li>Why do planted anomalies need valid approvers and normal posting lags? (So each is caught by <em>its own</em> test,
+   and a test passing because of a side-effect would not fool us.)</li>
+<li>Why do automated entries have no approver? (They are system postings; the approval tests target manual ones.)</li>
+<li>Why does the generator create duplicate payments with a different invoice number a third of the time? (So a
+   test that only matches invoice numbers cannot catch them all; the amount-based test must.)</li>
+</ol>
+<hr />
+<h1 id="4-the-audit-tests-rules-one-by-one">4. The audit tests (rules): one by one</h1>
+<h2 id="41-how-every-rule-is-built-the-common-pattern">4.1 How every rule is built (the common pattern)</h2>
+<p>Each module in <code>rules/</code> exposes <code>run(Dataset)</code> and returns a <strong>flags table</strong> with five columns:
+<code>entry_id</code>, <code>family</code>, <code>rule_code</code>, <code>reason</code>, <code>related_entry_id</code>. The helper <code>make_flags</code> in <code>rules/base.py</code> builds
+it, and <code>combine</code> merges tables and removes duplicate (entry, code) pairs. <code>run_all_rules</code> in
+<code>rules/__init__.py</code> calls every family.</p>
+<p>Two design rules to be able to state:</p>
+<ul>
+<li><strong>Thresholds are never hardcoded.</strong> Every number below is read from <code>config.yaml</code> under <code>rules:</code> (pydantic
+  validates it in <code>config.py</code>). Change the file, not the code.</li>
+<li><strong>Every flag explains itself.</strong> The <code>reason</code> is a full sentence with the specific numbers, e.g. <em>"Posted
+  2025-05-06 into period 2025-03, which closed 2025-04-05"</em>.</li>
+</ul>
+<p>Rules work on the <strong>entry-level table</strong> built by <code>dataset.build_entries</code> (one row per entry with <code>amount</code> = total
+debit, sets of debit and credit accounts, and <code>is_invoice</code> / <code>is_payment</code> identified from the accounts). Rules that
+need master data (vendors, employees, users, bank changes) silently skip when it is missing, so an uploaded
+journal-only CSV still gets the other tests.</p>
+<h2 id="42-duplicate-payments-rulesduplicatespy">4.2 Duplicate payments (<code>rules/duplicates.py</code>)</h2>
+<p><strong>Story.</strong> Paying the same invoice twice is among the most common and expensive accounts-payable errors, and an
+easy way to siphon cash.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Fires when</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DUP_SAME_INVOICE</code></td>
+<td>Two payments to one vendor reference the same invoice number (a trailing re-key suffix such as <code>-R</code> is stripped)</td>
+<td>40</td>
+</tr>
+<tr>
+<td><code>DUP_EXACT_AMOUNT</code></td>
+<td>Same vendor, identical amount, within 7 days (<code>window_days</code>)</td>
+<td>35</td>
+</tr>
+<tr>
+<td><code>DUP_NEAR_AMOUNT</code></td>
+<td>Same vendor, amounts within 0.5% (<code>amount_tolerance_pct</code>), within 7 days</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<p><strong>How it works.</strong> Take all payments (<code>ds.payments</code>), self-join them on <code>vendor_id</code> (and on the normalised invoice
+number for the first test), keep each pair once (<code>entry_id &lt; entry_id_o</code>), apply the date and amount conditions,
+and flag <strong>both</strong> entries of the pair, each pointing at the other via <code>related_entry_id</code>. Normalising the invoice
+number is <code>re.sub(r"\D+$", "", s)</code>: remove trailing non-digits.</p>
+<p><strong>Real example.</strong> <em>"Payment of 34,542.874 to vendor V0025 on 2025-03-02 is identical to 34,542.874 paid to the
+same vendor on 2025-03-03 (JE002532)."</em></p>
+<p><strong>Why three codes?</strong> Evidence strength differs. An identical amount to the fils is very unlikely by chance; "near"
+is not (large vendors send similar invoices), so it gets a low weight. I split them after a first run showed 82
+near-amount flags with only 20% real hits.</p>
+<p><strong>What it misses.</strong> A repeat after more than 7 days, or an amount more than 0.5% different with a new invoice
+number, passes. The challenge set measures exactly this (Part 8).</p>
+<h2 id="43-approval-and-segregation-of-duties-rulesapprovalpy">4.3 Approval and segregation of duties (<code>rules/approval.py</code>)</h2>
+<p><strong>Story.</strong> The approval hierarchy is the main preventive control over spending. Defeating it, or approving
+your own work, is a classic fraud and error pathway.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Fires when</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SPLIT_BELOW_LIMIT</code></td>
+<td>At least 3 (<code>min_count</code>) invoices from one creator to one vendor, each 90%-100% of an approval limit (<code>band_low_pct</code>), within 10 days (<code>window_days</code>)</td>
+<td>35</td>
+</tr>
+<tr>
+<td><code>SELF_APPROVED</code></td>
+<td>A manual entry's creator equals its approver</td>
+<td>35</td>
+</tr>
+<tr>
+<td><code>NO_APPROVER</code></td>
+<td>A manual entry has no approver</td>
+<td>30</td>
+</tr>
+<tr>
+<td><code>APPROVER_OVER_LIMIT</code></td>
+<td>Entry amount exceeds the approver's limit (from the users table)</td>
+<td>25</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Split purchases in detail.</strong> Limits come from the roles in <code>config.yaml</code> (25,000; 100,000; 500,000; 5,000,000).
+For each invoice, <code>_near_limit</code> tests whether <code>0.90 x limit &lt;= amount &lt; limit</code>. Candidates are grouped by
+(vendor, creator) and sorted by date. A <strong>sliding window</strong> with <code>numpy.searchsorted</code> finds, for each candidate,
+how many fall within 10 days; if at least 3, all of them are flagged. Total value is quoted in the reason:
+<em>"97,757.382 is just under the 100,000 approval limit; 3 such invoices from fdawood to vendor V0011 within 10
+days total 294,420.824."</em> (A 294k purchase that would have needed CFO approval was approved at lower levels.)</p>
+<p><strong>What it misses.</strong> Splits at 80-88% of the limit, only two parts, or spread across several people (all tested
+in the challenge set). Collusion (A approves B's entries and B approves A's) does not equal self-approval.</p>
+<h2 id="44-timing-rulestimingpy">4.4 Timing (<code>rules/timing.py</code>)</h2>
+<p><strong>Story.</strong> Few people have a legitimate reason to key manual entries when the office is closed. Entries slipped
+into closed periods or dated far back are a way to move results between periods.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Fires when</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WEEKEND_POSTING</code></td>
+<td>Manual entry posted on Friday or Saturday</td>
+<td>25</td>
+</tr>
+<tr>
+<td><code>HOLIDAY_POSTING</code></td>
+<td>Manual entry posted on a weekday Bahrain public holiday</td>
+<td>25</td>
+</tr>
+<tr>
+<td><code>POST_CLOSE_POSTING</code></td>
+<td>Posting date is after the period's close date (month end + 5 days)</td>
+<td>35</td>
+</tr>
+<tr>
+<td><code>BACKDATED_POSTING</code></td>
+<td>Posting date is more than 30 days after the document date</td>
+<td>25</td>
+</tr>
+</tbody>
+</table>
+<p><strong>How.</strong> Weekend uses <code>day_of_week in (4, 5)</code> (Monday = 0, so Friday = 4). Holidays come from
+<code>bh_calendar.bahrain_holidays</code>. The close date is <code>PeriodIndex(period).to_timestamp(how="end") + 5 days</code>.
+Only entries with <code>source</code> in <code>rules.timing.weekend_sources</code> (manual) are tested for weekend and holiday, because
+payroll and depreciation legitimately run on the last calendar day.</p>
+<p><strong>Cross-talk to know.</strong> A post-close entry usually also has a long posting lag, so it often gets both
+<code>POST_CLOSE_POSTING</code> and <code>BACKDATED_POSTING</code>. Noisy-OR (Part 7) handles that sensibly.</p>
+<h2 id="45-amounts-rulesamountspy">4.5 Amounts (<code>rules/amounts.py</code>)</h2>
+<p><strong>Story.</strong> Real transactions produce messy amounts; round ones suggest estimates or invention. Large manual
+journals near period end are a recognised management-override and earnings-management risk.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Fires when</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ROUND_AMOUNT</code></td>
+<td>Manual entry of at least 5,000 that is an exact multiple of 1,000, and not a repeating contract amount</td>
+<td>25</td>
+</tr>
+<tr>
+<td><code>LARGE_MANUAL_PERIOD_END</code></td>
+<td>Manual entry at or above 250,000 (materiality), posted in the last 3 business days of the month</td>
+<td>40</td>
+</tr>
+<tr>
+<td><code>LARGE_MANUAL</code></td>
+<td>Same size, but not near period end</td>
+<td>25</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The modulo trick.</strong> Testing <code>amount % 1000 == 0</code> with floats is fragile (1000.0000000001). The code uses
+<code>((amount + 500) % 1000) - 500</code> and checks it is close to 0, which maps every remainder into the range -500 to
++500 so values just below <em>or</em> above a multiple both land near 0.</p>
+<p><strong>Contract exemption.</strong> If the same (vendor, amount) pair repeats at least 6 times (<code>recurring_repeat_exempt</code>),
+it is treated as a contract (rent), not a red flag. The challenge set shows the limit: a contract paid only four
+times is flagged.</p>
+<h2 id="46-vendor-master-data-rulesvendorspy">4.6 Vendor master data (<code>rules/vendors.py</code>)</h2>
+<p><strong>Story.</strong> A vendor that shares an employee's bank account is the textbook fictitious-vendor scheme. A changed
+bank account followed quickly by a large payment is the textbook business-email-compromise pattern.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Fires when</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GHOST_VENDOR_BANK</code></td>
+<td>A vendor's bank account equals an employee's</td>
+<td>45</td>
+</tr>
+<tr>
+<td><code>GHOST_VENDOR_ADDRESS</code></td>
+<td>A vendor's address equals an employee's</td>
+<td>35</td>
+</tr>
+<tr>
+<td><code>BANK_CHANGE_LARGE_PAYMENT</code></td>
+<td>A payment of at least 20,000 and at least 5x the vendor's median payment, 0-14 days after a bank change</td>
+<td>35</td>
+</tr>
+</tbody>
+</table>
+<p><strong>How.</strong> Text is normalised (<code>lowercase, keep only letters and digits</code>) and merged on equality, so <code>bh11 AAAA...</code>
+and <code>BH11AAAA...</code> match. <strong>Every entry</strong> posted to a flagged vendor is flagged, because the risk attaches to the
+vendor. For bank changes, payments are merged with the change history on vendor, filtered to the window, and
+compared with the vendor's median payment. Reason: <em>"Payment of 90,448.425 to vendor V0071 1 days after its bank
+account changed on 2025-02-10 (vendor median payment 2,423.648)."</em></p>
+<p><strong>What it misses.</strong> Reformatted addresses ("Bldg" vs "Building") and payments more than 14 days after the change.
+A fuzzy-matching upgrade is on the "next steps" list.</p>
+<h2 id="47-invoice-number-sequences-rulessequencepy">4.7 Invoice-number sequences (<code>rules/sequence.py</code>)</h2>
+<p><strong>Story.</strong> Vendor invoices normally arrive in numeric order. A jump may mean documents were removed or numbers
+invented; a lower number arriving later suggests backdating or fabrication; a repeated number suggests a duplicate.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Fires when</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>INVOICE_GAP</code></td>
+<td>Number jumps by more than 50 (<code>max_gap</code>) from the previous</td>
+<td>25</td>
+</tr>
+<tr>
+<td><code>INVOICE_OUT_OF_ORDER</code></td>
+<td>Number is lower than one already received</td>
+<td>30</td>
+</tr>
+<tr>
+<td><code>DUPLICATE_INVOICE_NUMBER</code></td>
+<td>The same vendor invoice number booked twice</td>
+<td>30</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The cummax trick.</strong> For each vendor, invoices are sorted by document date, then number. <code>prev_max</code> is the running
+maximum of earlier numbers (<code>cummax().shift()</code>), and <code>step = number - prev_max</code>. If <code>step &gt; 50</code> it is a gap; if
+<code>step &lt; 0</code> it is out of order. Using the running <strong>maximum</strong> (not just the previous row) means one late low number
+flags only itself, not the invoices after it.</p>
+<h2 id="48-account-usage-rulespairingspy">4.8 Account usage (<code>rules/pairings.py</code>)</h2>
+<p><strong>Story.</strong> A journal that moves value between accounts never otherwise linked (e.g. Suspense paid from Bank), or a
+user posting to an account outside their normal duties, are classic signs of error or override.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Fires when</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RARE_ACCOUNT_PAIR</code></td>
+<td>The (debit account, credit account) pair appears in at most 3 entries all year</td>
+<td>30</td>
+</tr>
+<tr>
+<td><code>RARE_USER_ACCOUNT</code></td>
+<td>A user with at least 50 manual entries posts to an account in at most 3 of them</td>
+<td>25</td>
+</tr>
+</tbody>
+</table>
+<p><strong>How.</strong> Count how many entries use each pair (or each user-account combination) and flag the rare ones. Rarity is
+judged against the ledger's <strong>own history</strong>, not a fixed list, so it adapts to any company. The 50-entry minimum
+stops a new user's few entries being "rare" by definition.</p>
+<p><strong>Real example.</strong> The top entry in the queue, JE007482: <em>"Debit 6000 / credit 2000 is an unusual account pairing:
+seen in only 3 entries all year"</em> and <em>"jkooheji posted to account 6000 in only 1 of their 142 manual entries."</em></p>
+<h2 id="49-summary-of-weights">4.9 Summary of weights</h2>
+<p>Weights express <strong>how specific and trustworthy</strong> a test is (0-100). They are judgement calls from audit practice,
+not fitted to the labels. The highest are the most specific (ghost vendor bank 45; large period-end journal 40;
+duplicate by invoice 40); the lowest are noisy (near-duplicate amount 8; Benford at vendor level 15).</p>
+<hr />
+<h1 id="5-benfords-law-in-depth">5. Benford's Law in depth</h1>
+<p>This is the most mathematical test, and the one interviewers like to probe. Make sure you can explain it from
+scratch.</p>
+<h2 id="51-the-idea">5.1 The idea</h2>
+<p>In many real collections of amounts (invoices, populations, river lengths), the <strong>first digit</strong> is not equally
+likely to be 1 through 9. The digit 1 leads about 30% of the time and 9 only about 5%. The exact probability that
+the first digit is <em>d</em> is:</p>
+<blockquote>
+<p>P(d) = log10(1 + 1/d)</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Digit</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Expected share</td>
+<td>30.1%</td>
+<td>17.6%</td>
+<td>12.5%</td>
+<td>9.7%</td>
+<td>7.9%</td>
+<td>6.7%</td>
+<td>5.8%</td>
+<td>5.1%</td>
+<td>4.6%</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Intuition.</strong> Quantities that grow multiplicatively spend a long time starting with 1. To go from 1,000 to 2,000
+a quantity must double (100% growth); to go from 8,000 to 9,000 it grows only 12.5%. On a <em>logarithmic</em> scale
+(which is how multiplicative growth looks), the stretch from 1,000 to 2,000 is much longer than from 9,000 to
+10,000, so more values fall there. The formula is just the length of each digit's stretch on a log scale.</p>
+<p><strong>Why it helps auditors.</strong> People who invent numbers tend to spread digits roughly evenly, or favour certain
+digits, or cluster just below thresholds (e.g. invoices of 9,900 to stay under 10,000). Those habits break the
+pattern.</p>
+<h2 id="52-when-it-does-not-apply-say-this-unprompted-in-an-interview">5.2 When it does NOT apply (say this unprompted in an interview)</h2>
+<ul>
+<li>Numbers assigned rather than measured (phone numbers, invoice numbers).</li>
+<li>Amounts bounded by contract or price list, or limited to a narrow range (a vendor that always bills 800-1,200).</li>
+<li>Too few observations.</li>
+<li>Data that does not span several orders of magnitude.</li>
+</ul>
+<p>That is why a Benford flag is a <strong>lead, not proof</strong>, and why AuditLens tests per vendor only when there are at
+least 50 invoices (<code>rules.benford.min_invoices</code>).</p>
+<h2 id="53-the-test-chi-square-goodness-of-fit">5.3 The test: chi-square goodness of fit</h2>
+<p>For a vendor with <em>n</em> invoices, count how many start with each digit (observed, <em>O</em>). Under Benford the expected
+count for digit <em>d</em> is <em>E = n x P(d)</em>. The statistic is:</p>
+<blockquote>
+<p>chi-square = sum over d=1..9 of (O_d - E_d)^2 / E_d</p>
+</blockquote>
+<p>Big values mean the observed counts are far from expected. With 9 digit categories there are <strong>8 degrees of
+freedom</strong> (the counts must add up to n, which removes one). From the chi-square distribution we get a <strong>p-value</strong>:
+the probability of a deviation at least this large <em>if the vendor really followed Benford</em>. A tiny p-value means
+"this would almost never happen by chance."</p>
+<p><strong>The threshold.</strong> We flag when p &lt; 0.001 (<code>rules.benford.p_threshold</code>). For 8 degrees of freedom that corresponds
+to a chi-square above about <strong>26.1</strong>. It is deliberately strict because we test many vendors (see 5.5).</p>
+<h2 id="54-worked-example-the-planted-vendor-v0122-real-numbers">5.4 Worked example: the planted vendor V0122 (real numbers)</h2>
+<p>V0122 has 60 invoices whose amounts were drawn uniformly between 7,000 and 9,990, so every amount starts with 7,
+8 or 9.</p>
+<table>
+<thead>
+<tr>
+<th>Digit</th>
+<th>Benford share</th>
+<th>Expected count (E, of 60)</th>
+<th>Observed (O)</th>
+<th>(O-E)^2 / E</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>30.1%</td>
+<td>18.06</td>
+<td>0</td>
+<td>18.1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>17.6%</td>
+<td>10.57</td>
+<td>0</td>
+<td>10.6</td>
+</tr>
+<tr>
+<td>3</td>
+<td>12.5%</td>
+<td>7.50</td>
+<td>0</td>
+<td>7.5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>9.7%</td>
+<td>5.81</td>
+<td>0</td>
+<td>5.8</td>
+</tr>
+<tr>
+<td>5</td>
+<td>7.9%</td>
+<td>4.75</td>
+<td>0</td>
+<td>4.8</td>
+</tr>
+<tr>
+<td>6</td>
+<td>6.7%</td>
+<td>4.02</td>
+<td>0</td>
+<td>4.0</td>
+</tr>
+<tr>
+<td>7</td>
+<td>5.8%</td>
+<td>3.48</td>
+<td>17</td>
+<td>52.5</td>
+</tr>
+<tr>
+<td>8</td>
+<td>5.1%</td>
+<td>3.07</td>
+<td>21</td>
+<td>104.8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>4.6%</td>
+<td>2.75</td>
+<td>22</td>
+<td>135.0</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td></td>
+<td></td>
+<td><strong>60</strong></td>
+<td><strong>343.0</strong></td>
+</tr>
+</tbody>
+</table>
+<p>chi-square = <strong>343.0</strong>, far above 26.1, so p = <strong>2.8 x 10^-69</strong>: essentially impossible by chance. The <strong>mean absolute
+deviation</strong> (MAD, the average gap between observed and expected <em>shares</em>) is 0.188. The dashboard's Benford page
+shows this chart: blue bars only at 7, 8, 9 against a dotted Benford curve.</p>
+<h2 id="55-multiple-testing-the-subtle-point">5.5 Multiple testing (the subtle point)</h2>
+<p>We run the test on 55 vendors (those with at least 50 invoices). If every vendor were genuinely Benford and we
+used p &lt; 0.05, we would expect about 2.75 false alarms (55 x 0.05). With p &lt; 0.001 we expect about <strong>0.055</strong>, i.e.
+usually none. In our data exactly one vendor fails: the planted one. This is the reasoning behind the strict
+threshold. (A related point: chi-square is an approximation that is best when every expected count is at least
+5; at n = 50 the expected count for digit 9 is 2.3, so the p-value is approximate, which is another reason to be
+strict and to call the result a lead.)</p>
+<h2 id="56-in-the-code">5.6 In the code</h2>
+<p><code>rules/benford.py</code>:</p>
+<ul>
+<li><code>first_digits(amounts)</code>: for each positive amount, <code>exponent = floor(log10(a))</code> and <code>digit = a // 10**exponent</code>.</li>
+<li><code>digit_counts</code>: <code>numpy.bincount</code> into digits 1-9.</li>
+<li><code>benford_table(ds)</code>: for each vendor with enough invoices, runs <code>scipy.stats.chisquare(observed, expected)</code> and
+  records n, chi-square, p-value, MAD and the observed share of each digit. It feeds both the rule and the dashboard.</li>
+<li><code>run(ds)</code>: for every vendor with p below the threshold, flags <strong>all</strong> of that vendor's invoices as
+  <code>BENFORD_VENDOR</code>. The test population is <strong>invoices only</strong> (credits to payables), not payments, because payments
+  repeat the same amounts and would double-count.</li>
+</ul>
+<p><strong>Weight 15, and why.</strong> It implicates a whole vendor, not one entry, so the weight is low; flagging 60 invoices at a
+high weight would flood the queue with one lead. In the combined view it sits below the alert threshold of 20 by
+design (the Benford page is where you read it).</p>
+<p><strong>Challenge result.</strong> A fabricated vendor with only 40 invoices is missed because it is below the 50-invoice minimum.</p>
+<hr />
+<h1 id="6-the-machine-learning-layer">6. The machine learning layer</h1>
+<h2 id="61-why-add-ml-to-a-rules-based-tool">6.1 Why add ML to a rules-based tool?</h2>
+<p>Rules only find what someone thought to write a rule for. An <strong>unsupervised</strong> model, which needs no labelled
+fraud, flags entries that are statistically odd compared with the rest, including patterns nobody anticipated.
+It is the right type of ML here because in real life you rarely have trustworthy fraud labels (you only know
+about frauds that were caught).</p>
+<h2 id="62-isolation-forest-the-intuition">6.2 Isolation Forest: the intuition</h2>
+<p>Imagine plotting entries as points. A <em>normal</em> entry sits inside a dense crowd; to isolate it from the others you
+need many cuts. An <em>unusual</em> entry sits alone; a few random cuts separate it.</p>
+<p>The algorithm:</p>
+<ol>
+<li>Build many random binary trees. At each node pick a <strong>random feature</strong> and a <strong>random split value</strong> between that
+   feature's min and max (for the sample at that node). Keep splitting until each point is alone.</li>
+<li>For a given entry, measure its <strong>path length</strong> (number of splits to isolate it) in each tree and average.</li>
+<li><strong>Short average path = easy to isolate = anomalous.</strong> Long path = blends in = normal.</li>
+</ol>
+<p>The formal score (Liu, Ting and Zhou, 2008) is <code>s = 2^(-E[h(x)] / c(n))</code>, where <code>E[h(x)]</code> is the average path length
+and <code>c(n) = 2(ln(n-1) + 0.5772) - 2(n-1)/n</code> is the average path length of an unsuccessful search in a binary
+tree, used to normalise. For a subsample of 256, <code>c = 10.2</code>. An entry isolated in 4 splits scores about 0.76
+(quite anomalous); one needing 10.2 splits scores 0.5 (ordinary).</p>
+<p><strong>Settings used</strong> (<code>ml:</code> in <code>config.yaml</code>, <code>ml/model.py</code>):</p>
+<ul>
+<li><code>n_estimators: 300</code> trees. More trees make the score more stable.</li>
+<li>Each tree is built on a random subsample of <strong>256</strong> entries (scikit-learn's default <code>max_samples="auto"</code> is
+  <code>min(256, n)</code>), which keeps it fast and works well for rare anomalies.</li>
+<li><code>random_state = 42</code>, so results are reproducible.</li>
+<li><code>contamination="auto"</code>. We do <strong>not</strong> use the model's own yes/no prediction; we use the continuous score.</li>
+</ul>
+<p>scikit-learn's <code>score_samples</code> returns the <em>negative</em> of <code>s</code>, so the code uses <code>-score_samples(...)</code> to make
+<strong>higher = more anomalous</strong>.</p>
+<p><strong>From score to percentile.</strong> <code>ml_score = rank(score, pct=True)</code> turns the raw score into a percentile between 0
+and 1 (1.0 = the most anomalous entry). A percentile is easy to threshold ("top 2%") and to combine with rule
+evidence, and it does not depend on the raw scale of the model.</p>
+<p><strong>ML flag.</strong> Entries with <code>ml_score &gt;= 0.98</code> (<code>ml.flag_percentile</code>) get an <code>ML_ANOMALY</code> flag, about 2% of entries
+(495 of 24,714).</p>
+<h2 id="63-the-20-features-mlfeaturespy">6.3 The 20 features (<code>ml/features.py</code>)</h2>
+<p>The model sees one row of numbers per entry. Trees are insensitive to monotone scaling, so no normalisation is
+needed. All features are computed from the journal (and the users table when present); <strong>no labels, and none of
+the generator's internal fields, are used</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Features</th>
+<th>Why they matter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Size</td>
+<td><code>log_amount</code>, <code>n_lines</code>, <code>is_round</code></td>
+<td>Unusually large, many-line or round entries</td>
+</tr>
+<tr>
+<td>Account norms</td>
+<td><code>account_amount_z</code></td>
+<td>Largest</td>
+</tr>
+<tr>
+<td>Vendor behaviour</td>
+<td><code>has_vendor</code>, <code>vendor_count_log</code>, <code>vendor_amount_z</code>, <code>amount_to_vendor_median</code></td>
+<td>Is this amount typical for this vendor? How established is the vendor?</td>
+</tr>
+<tr>
+<td>Twin entries</td>
+<td><code>twin_reldiff</code>, <code>twin_gap_days</code></td>
+<td>How close is the amount (relative difference) and date to the neighbouring entry of the same vendor and type? A duplicate-payment signature. Defaults: 1.0 and 365 when there is no neighbour</td>
+</tr>
+<tr>
+<td>Time</td>
+<td><code>day_of_week</code>, <code>is_weekend</code>, <code>is_holiday</code>, <code>day_of_month</code>, <code>days_to_month_end</code></td>
+<td>Odd timing</td>
+</tr>
+<tr>
+<td>Posting lag</td>
+<td><code>lag_days</code></td>
+<td>Backdating</td>
+</tr>
+<tr>
+<td>Source and people</td>
+<td><code>is_manual</code>, <code>user_account_rarity</code>, <code>account_pair_rarity</code>, <code>approver_limit_ratio</code></td>
+<td>Manual entries; rarity = -log10 of how common the user-account combination, or the debit-credit pair, is; amount as a multiple of the approver's limit</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Deliberately excluded.</strong> The rule signals themselves (self-approved, near-limit, missing approver) are <em>not</em>
+features. If they were, the model would just rediscover the rules and the "ML versus rules" comparison would be
+meaningless. The ML layer is meant to be an <strong>independent second opinion</strong>.</p>
+<p><strong>Z-score reminder.</strong> <code>z = (x - mean) / standard deviation</code>: how many standard deviations an amount is from the
+average. Amounts span orders of magnitude, so z-scores are computed on the <strong>log</strong> of the amount.</p>
+<h2 id="64-explaining-an-ml-flag-in-plain-language">6.4 Explaining an ML flag in plain language</h2>
+<p>A raw anomaly score is useless to an auditor ("why?"). So <code>explain()</code> names the three features that deviate most
+from <strong>similar entries</strong>:</p>
+<ol>
+<li>Peers are defined by <code>(is_manual, has_vendor)</code>: four groups (manual or automated, vendor or not). Comparing a
+   manual vendor invoice with automated payroll would make every manual entry look odd.</li>
+<li>Within the group, each feature gets a <strong>robust z-score</strong>: <code>(x - median) / (1.4826 x MAD)</code>, where MAD is the median
+   absolute deviation. Medians and MADs are not distorted by the very outliers we are hunting. The constant 1.4826
+   makes MAD comparable to a standard deviation for normal data. If MAD is 0 the code falls back to the standard
+   deviation, then to 1.</li>
+<li>Take the three features with the largest |z| and print value and the peer median.</li>
+</ol>
+<p>Real reason text: <em>"Statistically unusual entry (anomaly score in the top 2%): rarity of this user/account
+combination: 2.15 (typical for similar entries 0.18); amount as a multiple of the approver's limit: 0.17 (typical
+for similar entries 0.03); ..."</em></p>
+<h2 id="65-how-good-is-it-the-honest-answer">6.5 How good is it? (the honest answer)</h2>
+<ul>
+<li>ML alone: 495 flagged, 66 genuinely planted, so <strong>precision 13.3%</strong>, <strong>recall 16.0%</strong> (about 8 times better than
+  random at 1.7% prevalence, but still weak).</li>
+<li>It finds entries that are <em>numerically</em> odd: 50% of the large period-end journals, 49% of unusual account use,
+  31% of split purchases.</li>
+<li>It finds <strong>0%</strong> of duplicate payments, Benford vendors, sequence breaks and weekend postings, and 2% of ghost
+  vendors. Why: a duplicated payment looks like any other payment on its own; a ghost vendor's invoices look like
+  any invoice. Those anomalies are about <em>relationships</em> (this payment versus that one), not about one entry being
+  numerically extreme, so a model that looks at one entry at a time cannot see them.</li>
+<li>On the challenge set, it did catch all six journals sitting just under the materiality threshold that the fixed
+  rule missed, which is exactly the complementary value ML is meant to add.</li>
+</ul>
+<p>So in AuditLens ML is a <strong>second opinion that surfaces odd entries no rule describes</strong>, not a detector to trust
+on its own. Saying this plainly is a strength, not a weakness.</p>
+<hr />
+<h1 id="7-the-risk-score-and-the-review-queue">7. The risk score and the review queue</h1>
+<h2 id="71-why-combine-at-all">7.1 Why combine at all?</h2>
+<p>Auditors have limited time. They need one ranked list, not 23 separate rule outputs plus a model score. The
+score answers "which entries first?".</p>
+<h2 id="72-rule-evidence-the-noisy-or">7.2 Rule evidence: the noisy-OR</h2>
+<p>Each rule has a weight <em>w</em> between 0 and 100 (<code>scoring.rule_weights</code>), meaning roughly "how much does this
+signal alone raise suspicion". When several rules fire on one entry, we combine them with the <strong>noisy-OR</strong>:</p>
+<blockquote>
+<p>rule_score = 100 x ( 1 - product over fired rules of (1 - w/100) )</p>
+</blockquote>
+<p>Think of each rule as an independent detector that "catches" a true problem with probability w/100. The entry is
+suspicious if <strong>at least one</strong> detector would catch it, so we compute the chance that <em>none</em> does
+(<code>product of (1 - w/100)</code>) and subtract from 1.</p>
+<p><strong>Worked example (the top entry, JE007482).</strong> Two rules fired: <code>RARE_ACCOUNT_PAIR</code> (w = 30) and <code>RARE_USER_ACCOUNT</code>
+(w = 25).</p>
+<ul>
+<li>chance neither catches it = 0.70 x 0.75 = 0.525</li>
+<li>rule_score = 100 x (1 - 0.525) = <strong>47.5</strong></li>
+</ul>
+<p>Compare the alternatives: a plain <strong>sum</strong> would give 55 and could exceed 100 with enough rules; the <strong>maximum</strong>
+would give only 30 and ignore the second rule. Noisy-OR sits in between: more evidence always raises the score,
+with <strong>diminishing returns</strong>, and it can never exceed 100. It is also order-independent and easy to explain.</p>
+<h2 id="73-the-weights-judgement-not-fitted">7.3 The weights (judgement, not fitted)</h2>
+<table>
+<thead>
+<tr>
+<th>Weight</th>
+<th>Rules</th>
+<th>Reasoning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>45</td>
+<td><code>GHOST_VENDOR_BANK</code></td>
+<td>Very specific and serious: an employee's own bank account on a vendor</td>
+</tr>
+<tr>
+<td>40</td>
+<td><code>DUP_SAME_INVOICE</code>, <code>LARGE_MANUAL_PERIOD_END</code></td>
+<td>Specific and high impact</td>
+</tr>
+<tr>
+<td>35</td>
+<td><code>DUP_EXACT_AMOUNT</code>, <code>SPLIT_BELOW_LIMIT</code>, <code>SELF_APPROVED</code>, <code>POST_CLOSE_POSTING</code>, <code>GHOST_VENDOR_ADDRESS</code>, <code>BANK_CHANGE_LARGE_PAYMENT</code></td>
+<td>Strong control failures</td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>NO_APPROVER</code>, <code>INVOICE_OUT_OF_ORDER</code>, <code>DUPLICATE_INVOICE_NUMBER</code>, <code>RARE_ACCOUNT_PAIR</code></td>
+<td>Meaningful but with innocent explanations</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>APPROVER_OVER_LIMIT</code>, <code>WEEKEND_POSTING</code>, <code>HOLIDAY_POSTING</code>, <code>BACKDATED_POSTING</code>, <code>ROUND_AMOUNT</code>, <code>LARGE_MANUAL</code>, <code>INVOICE_GAP</code>, <code>RARE_USER_ACCOUNT</code></td>
+<td>Common risk indicators; often benign alone</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>BENFORD_VENDOR</code></td>
+<td>Vendor-level lead</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>DUP_NEAR_AMOUNT</code></td>
+<td>Weak: coincidences are common</td>
+</tr>
+</tbody>
+</table>
+<p>These are set from audit reasoning and <strong>not tuned on the labels</strong>. If asked "why 40 and not 35?", the honest
+answer is that the exact number matters less than the ordering, and the weights are configurable.</p>
+<h2 id="74-ml-points">7.4 ML points</h2>
+<p>ML only adds points to entries that are already ML-flagged (top 2%):</p>
+<blockquote>
+<p>ml_points = 30 x (ml_score - 0.98) / (1 - 0.98), clipped at 0</p>
+</blockquote>
+<p>So the most anomalous entry gets the full 30 points, an entry at the 99th percentile gets 15, and everything
+below the 98th gets 0. For JE007482 the ML score is essentially 1.0, so about 29.6 points.</p>
+<blockquote>
+<p><strong>risk_score = min(100, rule_score + ml_points) = 47.5 + 29.6 = about 77</strong></p>
+</blockquote>
+<p><strong>Why only for flagged entries?</strong> Every entry that scores ML points also carries an <code>ML_ANOMALY</code> flag and therefore a
+written reason. Early in development entries between the 95th and 98th percentile got points but no reason; a test
+caught it and the design was changed so that one threshold controls both. <strong>Why cap at 30?</strong> So that rules (specific
+and explainable) carry most of the weight, and the model cannot push an entry with no rule evidence above the
+Medium tier by itself.</p>
+<h2 id="75-tiers-and-the-queue">7.5 Tiers and the queue</h2>
+<ul>
+<li><strong>Tiers</strong> (<code>scoring.risk_tiers</code>): <strong>High</strong> at 50 or more, <strong>Medium</strong> from 20 to 50, <strong>Low</strong> below 20. Two rules fire, or
+  one strong rule plus a high ML score, to reach High. A single ML flag at maximum (30 points) is Medium.</li>
+<li><strong>Queue</strong> (<code>ml/scoring.py: build_review_queue</code>): all entries with <code>risk_score &gt;= 1</code>, sorted by risk score, then ML
+  score, then amount. 903 entries: 71 High, 427 Medium, 405 Low. Columns: rank, risk score and tier, rule score,
+  ML score, number of flags, rule codes, concatenated reasons, related entry ids, and the entry's details.</li>
+</ul>
+<h2 id="76-the-executive-summary-summarypy">7.6 The executive summary (<code>summary.py</code>)</h2>
+<ul>
+<li><code>split_attention</code> divides the High and Medium entries into <strong>rule-backed</strong> (rule_score above 0: 360 entries) and
+  <strong>ML-only</strong> (138). ML-only is shown last and labelled lower-confidence because ML alone is about 13% precise.</li>
+<li><code>themes</code> groups rule-backed High/Medium entries by rule <em>family</em>, with an auditor-style <strong>suggested follow-up
+  procedure</strong> for each (a dictionary <code>THEMES</code>). ML-only entries form their own last theme.</li>
+<li><code>headline</code> writes the paragraph at the top of the Overview.</li>
+</ul>
+<p>All of it is derived from flags and scores only; a test checks it never touches the labels.</p>
+<hr />
+<h1 id="8-evaluation-how-we-know-whether-it-works">8. Evaluation: how we know whether it works</h1>
+<h2 id="81-the-setup">8.1 The setup</h2>
+<p>Because the generator wrote a separate answer key (<code>labels.csv</code>), we can score the system like an exam. The
+<strong>unit</strong> is one journal entry. A <strong>positive</strong> is any entry that appears in the label file (this includes the
+genuine <em>original</em> of a duplicated payment, because the test is supposed to flag both). There are 412 positives
+among 24,714 entries, so <strong>24,302 are clean</strong>.</p>
+<p>For one system (say, "rules alone") each entry falls in one of four boxes:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Truly anomalous</th>
+<th>Truly clean</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Flagged</strong></td>
+<td>True positive (TP)</td>
+<td>False positive (FP)</td>
+</tr>
+<tr>
+<td><strong>Not flagged</strong></td>
+<td>False negative (FN)</td>
+<td>True negative (TN)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="82-the-metrics-with-the-real-numbers">8.2 The metrics, with the real numbers</h2>
+<ul>
+<li><strong>Precision</strong> = TP / (TP + FP): "of what we flagged, how much was real?" It is the auditor's wasted-time measure.</li>
+<li><strong>Recall</strong> = TP / (TP + FN): "of what was real, how much did we find?" It is the missed-risk measure.</li>
+<li><strong>F1</strong> = 2 x precision x recall / (precision + recall): one number balancing both (the harmonic mean, which
+  punishes a system that is good at only one).</li>
+<li><strong>False-positive rate (FPR)</strong> = FP / (clean entries): the share of clean entries wrongly flagged.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Flagged</th>
+<th>TP</th>
+<th>FP</th>
+<th>FN</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rules alone (any rule fired)</td>
+<td>490</td>
+<td>412</td>
+<td>78</td>
+<td>0</td>
+<td>84.1%</td>
+<td>100%</td>
+<td>0.914</td>
+</tr>
+<tr>
+<td>ML alone (top 2% of anomaly score)</td>
+<td>495</td>
+<td>66</td>
+<td>429</td>
+<td>346</td>
+<td>13.3%</td>
+<td>16.0%</td>
+<td>0.146</td>
+</tr>
+<tr>
+<td>Combined (risk score 20 or more)</td>
+<td>498</td>
+<td>348</td>
+<td>150</td>
+<td>64</td>
+<td>69.9%</td>
+<td>84.5%</td>
+<td>0.765</td>
+</tr>
+</tbody>
+</table>
+<p>Reading: the rules found everything (they were built for these anomalies) at the cost of 78 false alarms. ML alone
+is mostly noise. The combined view misses 64: 60 are the Benford vendor's invoices (weight 15, below the alert
+threshold of 20 by design) and 4 are weak near-amount duplicates.</p>
+<p><strong>Confidence intervals.</strong> A proportion measured on a finite sample is uncertain. The report gives 95% Wilson score
+intervals, which behave well for small samples and for values near 0 or 100%. With <em>p</em> = k/n and <em>z</em> = 1.96:</p>
+<blockquote>
+<p>centre = (p + z^2/2n) / (1 + z^2/n); half-width = z x sqrt(p(1-p)/n + z^2/4n^2) / (1 + z^2/n)</p>
+</blockquote>
+<p>For the rules' precision (412/490) this gives 81% to 87%.</p>
+<h2 id="83-per-type-metrics-and-how-they-are-defined">8.3 Per-type metrics and how they are defined</h2>
+<p>The project specification asks for precision, recall and F1 <strong>per anomaly type</strong>. The definitions (stated in the report too):</p>
+<ul>
+<li><strong>Recall for a type</strong> = share of that type's planted entries that the system flagged at all.</li>
+<li><strong>Precision for a type (rules and combined)</strong> = of the flagged entries that carry a rule <em>designed</em> for that type,
+  the share that really are that type. The mapping from type to rule codes is <code>TYPE_CODES</code> in <code>evaluate.py</code>.</li>
+<li><strong>Precision for ML</strong> = its <em>yield</em>: the share of all ML flags that are that type (ML has no designed type).</li>
+</ul>
+<p>Recall by type for the rules is 100% everywhere; for ML it ranges from 0% to 50%; for the combined score it is
+100% except duplicates (92%, the 4 near-amount-only cases) and Benford (0%).</p>
+<h2 id="84-precision-at-k-the-auditor-capacity-view">8.4 Precision at K (the auditor-capacity view)</h2>
+<p>If reviewers can only look at K entries, what matters is how clean the <em>top K</em> of the ranked list is.
+<strong>Precision@K</strong> = (real anomalies among the top K) / K.</p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Precision@50</th>
+<th>Precision@100</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rules alone (ranked by rule score, ties by amount)</td>
+<td>100%</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>ML alone (ranked by anomaly score)</td>
+<td>28%</td>
+<td>21%</td>
+</tr>
+<tr>
+<td>Combined (ranked by risk score)</td>
+<td>100%</td>
+<td>100%</td>
+</tr>
+</tbody>
+</table>
+<p>So the top 100 of the queue are all real. Recall@100 is only 24%, simply because there are 412 anomalies and K = 100
+(the maximum possible is 100/412).</p>
+<h2 id="85-the-base-rate-problem-the-most-important-caveat">8.5 The base-rate problem (the most important caveat)</h2>
+<p>In the synthetic data, 1.7% of entries are anomalous. In a real ledger the rate of true problems is far lower
+(assume 0.1%). <strong>Precision depends on how common positives are.</strong> Use the rules' own numbers: recall about 100% and
+FPR = 78 / 24,302 = 0.32%. Per 100,000 real entries:</p>
+<ul>
+<li>100 true problems -&gt; about 100 caught,</li>
+<li>99,900 clean entries x 0.32% = about 321 false alarms.</li>
+</ul>
+<blockquote>
+<p>precision = 100 / (100 + 321) = <strong>about 24%</strong></p>
+</blockquote>
+<p>That is the formula <code>precision = R x pi / (R x pi + FPR x (1 - pi))</code> with pi = 0.001. The same system that looks 84%
+precise here would hand an auditor roughly three false alarms per real problem. This is the single most honest
+thing in the project; say it before anyone asks.</p>
+<h2 id="86-stability-across-seeds-and-the-threshold-choice">8.6 Stability across seeds and the threshold choice</h2>
+<ul>
+<li><strong>Seeds.</strong> Regenerating with four other seeds (1001-1004) and re-running everything gave rules 84.9% +/- 4.0%
+  precision and 100% recall; ML 13.9% +/- 2.4% and 16.7% +/- 2.8%; combined 71.7% +/- 1.3% and 83.7% +/- 1.0%.
+  So the results are not a fluke of one random draw (although the data come from the same generator).</li>
+<li><strong>Alert threshold.</strong> The combined view uses risk &gt;= 20. The report shows what other thresholds would do:</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Threshold</th>
+<th>Flagged</th>
+<th>Precision</th>
+<th>Recall</th>
+<th>F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (whole queue)</td>
+<td>903</td>
+<td>45.6%</td>
+<td>100%</td>
+<td>0.627</td>
+</tr>
+<tr>
+<td>10</td>
+<td>700</td>
+<td>58.3%</td>
+<td>99.0%</td>
+<td>0.734</td>
+</tr>
+<tr>
+<td><strong>20 (used)</strong></td>
+<td>498</td>
+<td>69.9%</td>
+<td>84.5%</td>
+<td>0.765</td>
+</tr>
+<tr>
+<td>30</td>
+<td>268</td>
+<td>95.1%</td>
+<td>61.9%</td>
+<td>0.750</td>
+</tr>
+<tr>
+<td>40</td>
+<td>141</td>
+<td>100%</td>
+<td>34.2%</td>
+<td>0.510</td>
+</tr>
+<tr>
+<td>50</td>
+<td>71</td>
+<td>100%</td>
+<td>17.2%</td>
+<td>0.294</td>
+</tr>
+</tbody>
+</table>
+<p>The threshold was fixed in advance from the scoring design and <strong>not tuned afterwards</strong>; the table shows the
+  precision-recall trade-off honestly. A higher threshold means fewer, more certain leads.</p>
+<h2 id="87-the-challenge-set-breaking-our-own-system">8.7 The challenge set (breaking our own system)</h2>
+<p>The main test is circular: the rules implement the same definitions the generator planted. So
+<code>challenge.py</code> builds a second ledger with <strong>no standard anomalies</strong> and plants 20 variants of four kinds:</p>
+<ul>
+<li><strong>Boundary cases</strong> just outside a threshold: a duplicate payment 12 days later (window is 7), a split at 80-88% of
+  the limit (band starts at 90%), a journal of 225,000-245,000 (materiality 250,000), a gap of 30-45 (limit 50),
+  backdating by 20-26 days (limit 30), only two split invoices (minimum is 3), and so on.</li>
+<li><strong>Disguised</strong> cases: an employee's address reformatted ("Bldg" to "Building"), reciprocal approvals (A approves B,
+  B approves A).</li>
+<li><strong>Controls</strong>: cases the rules <em>should</em> catch, to prove nothing is silently broken.</li>
+<li><strong>Decoys</strong>: legitimate entries that look like anomalies, to measure false alarms on look-alikes.</li>
+</ul>
+<p><strong>Results</strong> (<code>docs/challenge_report.md</code>):</p>
+<ul>
+<li>Controls: <strong>100%</strong> caught by the intended rule (29 entries).</li>
+<li>Boundary and disguised cases: only <strong>3%</strong> caught by the intended rule (175 entries). Thresholds are known to a
+  fraudster and can be avoided.</li>
+<li><strong>ML rescues one gap:</strong> all six journals just under materiality were flagged by ML and reached the queue.</li>
+<li>Decoys: <strong>100%</strong> reached the queue. By data alone, a legitimate large capex accrual looks identical to a
+  suspicious one.</li>
+</ul>
+<p><strong>What this proves and does not.</strong> It proves where the limits are, with numbers, and that the tests still work. It
+does not prove real-world performance, because I wrote this set too; the next step is a set written by someone
+else or real client data.</p>
+<h2 id="88-in-the-code">8.8 In the code</h2>
+<p><code>evaluate.py</code>: <code>prf</code>, <code>wilson</code>, <code>flagged_sets</code> (rules = any rule flag; ML = ML flags; combined = risk at or above
+the threshold), <code>rankings</code> (the order each system would give an auditor), <code>overall_table</code>, <code>per_type_table</code>,
+<code>ranking_tables</code>, <code>false_positive_sources</code> (which rule codes produce the most false alarms), <code>evaluate_result</code>,
+<code>seed_stability</code>. <code>eval_report.py</code> writes the markdown; <code>eval_charts.py</code> the PNGs (colours from a validated
+colour-blind-safe palette). <code>python -m auditlens.evaluate --publish-docs</code> refreshes <code>docs/</code>.</p>
+<hr />
+<h1 id="9-the-dashboard-the-upload-pipeline-and-the-excel-workpaper">9. The dashboard, the upload pipeline and the Excel workpaper</h1>
+<h2 id="91-app-structure-streamlit">9.1 App structure (Streamlit)</h2>
+<ul>
+<li><code>app.py</code> is the <strong>shell</strong>: page config, CSS, sidebar navigation, then calls the chosen page's <code>render(bundle)</code>.</li>
+<li><code>dashboard/state.py</code> defines <code>Bundle</code> (dataset + analysis + labels + name) and <code>active_bundle()</code>. The demo bundle
+  is built once by <code>load_demo_bundle()</code> decorated with <code>@st.cache_resource</code>, so every visitor shares one analysed
+  dataset. It uses <code>data/</code> if present and otherwise generates in memory (that is why Streamlit Cloud works with no
+  data files).</li>
+<li>Pages: <code>overview.py</code>, <code>queue.py</code>, <code>detail.py</code>, <code>benford_page.py</code>, <code>evaluation_page.py</code>, <code>upload.py</code>.</li>
+<li><code>dashboard/style.py</code>: CSS, KPI cards (a responsive CSS grid), pills, Plotly layout.</li>
+</ul>
+<p><strong>Streamlit's execution model (crucial to understand).</strong> Streamlit reruns the whole script on every click. State that
+must survive lives in <code>st.session_state</code>. Keys used here: <code>nav</code> (current page), <code>_goto</code> (a navigation request),
+<code>detail_entry</code>, <code>reviews</code> (statuses and notes per dataset), <code>active_dataset</code>, <code>upload_bundle</code>, <code>upload_result</code>.</p>
+<p><strong>The <code>_goto</code> pattern.</strong> Streamlit forbids changing a widget's state after the widget has been created in the same
+run. A button callback or the upload page therefore stores the desired page in <code>_goto</code>; at the very top of the next
+run <code>app.py</code> copies it into <code>nav</code> <em>before</em> the sidebar radio exists. The current page is also written to the URL
+(<code>?page=Review queue</code>), so a browser refresh stays on the page and deep links work.</p>
+<p><strong>Smoothness techniques.</strong> The queue filters sit inside <code>st.form</code> (nothing reruns until "Apply filters"). The review
+status panel on the detail page is an <code>st.fragment</code>, so changing status reruns only that panel. The Excel file is
+produced lazily when the download button is clicked (<code>data</code> is a callable <code>functools.partial</code>, run on another thread
+from plain snapshots, never touching <code>session_state</code>).</p>
+<h2 id="92-the-pages">9.2 The pages</h2>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>What it shows</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Overview</td>
+<td>Executive summary, tier KPIs, key findings with suggested procedures, supporting charts</td>
+<td>Rule-backed and ML-only separated</td>
+</tr>
+<tr>
+<td>Review queue</td>
+<td>Filters (tier, code, status, user, vendor, account, date, amount, risk), table with selection, bulk actions, Excel export</td>
+<td><code>filtered_queue</code> is a pure, tested function</td>
+</tr>
+<tr>
+<td>Entry detail</td>
+<td>All reasons (rule tags blue, ML tag orange), journal lines with account names, related entries, vendor panel, review status and notes</td>
+<td><code>related_entries</code> finds the matching duplicate</td>
+</tr>
+<tr>
+<td>Benford analysis</td>
+<td>Observed vs expected digit chart per vendor, statistics, all-vendor table</td>
+<td>Vendors under 50 invoices flagged as indicative</td>
+</tr>
+<tr>
+<td>Evaluation</td>
+<td>Metrics, P@K, recall by type, threshold sensitivity, false-positive sources, weaknesses</td>
+<td>Demo data only (needs labels)</td>
+</tr>
+<tr>
+<td>Data upload</td>
+<td>Template download, column mapping, validation, analysis</td>
+<td>Described next</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Related entries</strong> (<code>detail.related_entries</code>): entries named in flags' <code>related_entry_id</code> (in both directions), plus
+same-vendor entries within 14 days and 2% of the amount, plus same vendor and invoice number.</p>
+<h2 id="93-the-upload-pipeline-schemapy-dashboarduploadpy">9.3 The upload pipeline (<code>schema.py</code>, <code>dashboard/upload.py</code>)</h2>
+<ol>
+<li><strong>Read</strong> the CSV with every column as text (<code>dtype=str</code>) so nothing is silently converted.</li>
+<li><strong>Map columns.</strong> <code>suggest_mapping</code> normalises names (lowercase letters and digits only) and matches them to
+   standard fields through a synonym list ("GL Account" -&gt; <code>account</code>, "Dr" -&gt; <code>debit</code>). The user can correct each
+   choice. Five fields are required: <code>entry_id</code>, <code>posting_date</code>, <code>account</code>, <code>debit</code>, <code>credit</code>.</li>
+<li><strong>Parse dates strictly</strong> (<code>strict_dates</code>). Only explicit formats are accepted: ISO always; slash or dash dates in
+   the chosen order (day-first or month-first). A bug fixed during development: pandas' guessing quietly turned
+   <code>13/03/2025</code> into 13 March even when "month first" was selected, and would silently <em>swap</em> <code>05/03/2025</code>. Now an
+   impossible reading is an error.</li>
+<li><strong>Validate each row with pydantic</strong> (<code>JournalLine</code>): whole-number account; numeric non-negative amounts (commas
+   allowed); <code>source</code> is manual or automated (synonyms accepted); a line has a debit <strong>or</strong> a credit, not both and not
+   neither. Errors list the <strong>CSV row</strong> (index + 2, because row 1 is the header), the column and a plain-English
+   problem. At most 200 are collected.</li>
+<li><strong>Entry-level checks</strong>: every entry must <strong>balance</strong> (difference at most 0.01); line ids must be unique.</li>
+<li><strong>Defaults and warnings.</strong> Missing optional columns get defaults (document date = posting date, period from
+   the posting date, source = manual) and the user is told which tests will be blind as a result.</li>
+<li><strong>Analyse.</strong> The same pipeline runs; rules needing master data skip; the Evaluation page explains there are no
+   labels for uploaded data.</li>
+</ol>
+<h2 id="94-the-excel-workpaper-exportpy">9.4 The Excel workpaper (<code>export.py</code>)</h2>
+<p>Built with openpyxl: <strong>Cover</strong> (entity, period, data source, preparer, reviewer, purpose, scope, procedures
+performed, legend, a blank "results and conclusion" box, limitations); <strong>Flagged entries</strong> (formatted header,
+frozen panes, filter, risk-tier shading, number formats, a status drop-down that rejects typos, landscape print
+setup with the header repeated); <strong>Summary</strong> (counts by tier and status). It reads reviewer statuses and notes
+from the session, so work done in the app lands in the file.</p>
+<h2 id="95-a-real-bug-story-worth-telling">9.5 A real bug story worth telling</h2>
+<p>After the first version, you noticed that once the sidebar was collapsed there was no way to bring it back. The
+cause was my own CSS: to hide Streamlit's "Deploy" button I had hidden the entire toolbar, and in this Streamlit
+version the control that re-opens a collapsed sidebar lives inside that toolbar. I found it by inspecting the live
+page in a headless browser (the control existed but its visibility was <code>hidden</code>), fixed it by hiding only the Deploy
+button, menu and footer, and verified with a <em>real mouse click</em> at the control's position (not a programmatic
+click, which works even on invisible elements). I added a test that fails if CSS ever hides those controls, then
+audited every page at desktop and narrow widths and found and fixed four more small issues (squeezed KPI cards,
+truncated date filter, refresh returning to Overview, stale upload state).</p>
+<hr />
+<h1 id="10-engineering-config-tests-ci-and-hands-on-exercises">10. Engineering: config, tests, CI, and hands-on exercises</h1>
+<h2 id="101-configyaml-the-control-panel">10.1 <code>config.yaml</code>: the control panel</h2>
+<p>Every number that could be argued about lives here, not in code. <code>config.py</code> loads it into pydantic models with
+<code>extra="forbid"</code>, so a typo in a key name fails immediately instead of being silently ignored.</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>company</code>, <code>calendar</code></td>
+<td>Name, currency, fiscal year; days after month end before a period closes (5)</td>
+</tr>
+<tr>
+<td><code>roles</code></td>
+<td>Role rank, approval limit and head count (drives users, approvals, and the split-purchase limits)</td>
+</tr>
+<tr>
+<td><code>generation</code></td>
+<td>Seed, target line count, number of vendors and employees, seasonality curves</td>
+</tr>
+<tr>
+<td><code>anomalies</code></td>
+<td>How many of each of the 12 types are planted</td>
+</tr>
+<tr>
+<td><code>accounts</code></td>
+<td>Account codes the tests rely on (payables 2000, cash 1000) so another chart of accounts can be used</td>
+</tr>
+<tr>
+<td><code>rules</code></td>
+<td>Every threshold of every test (windows, tolerances, materiality, minimum counts, p-value)</td>
+</tr>
+<tr>
+<td><code>ml</code></td>
+<td>Number of trees, seed, flag percentile (0.98), number of features quoted in a reason</td>
+</tr>
+<tr>
+<td><code>scoring</code></td>
+<td>The 23 rule weights, ML point cap (30), queue minimum, risk tiers (50 and 20)</td>
+</tr>
+<tr>
+<td><code>evaluation</code></td>
+<td>Combined alert threshold (20), top-K values, seeds for the stability check, challenge seed</td>
+</tr>
+</tbody>
+</table>
+<h2 id="102-the-test-suite-162-tests">10.2 The test suite (162 tests)</h2>
+<p>Tests are what let you change things without fear, and they show a reviewer the project is trustworthy.</p>
+<table>
+<thead>
+<tr>
+<th>Test file</th>
+<th>What it protects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_generate.py</code> (26)</td>
+<td>Every entry balances; same seed gives identical data; labels are separate and complete; each planted anomaly really has its property; clean data really does not (e.g. no clean manual entry on a weekend); Benford conformity</td>
+</tr>
+<tr>
+<td><code>test_calendar.py</code></td>
+<td>Friday/Saturday weekend, Bahrain holidays, period close dates</td>
+</tr>
+<tr>
+<td><code>test_rules_*.py</code> (one per family)</td>
+<td>On tiny hand-built ledgers: one planted case is caught, one clean case is not. Plus an integration test on the full data: each planted type is caught at 95% or more, and under 1% of clean entries are flagged</td>
+</tr>
+<tr>
+<td><code>test_ml_pipeline.py</code>, <code>test_ml_scoring.py</code></td>
+<td>Features complete and finite; scores deterministic and in [0,1]; ML flag share matches config; the noisy-OR arithmetic; ML points only above the floor; queue ranked and explained; <strong>no source file in <code>rules/</code> or <code>ml/</code> reads the labels</strong></td>
+</tr>
+<tr>
+<td><code>test_evaluate.py</code></td>
+<td>The metric formulas on tiny examples (<code>prf</code>, Wilson intervals, per-type definitions); report and charts are produced</td>
+</tr>
+<tr>
+<td><code>test_schema.py</code>, <code>test_upload_flow.py</code></td>
+<td>Upload validation (each kind of error is located by row and column; strict dates never swap day and month); a foreign-format CSV maps, validates and analyses end to end</td>
+</tr>
+<tr>
+<td><code>test_export.py</code></td>
+<td>The Excel workbook structure, formats, drop-down, cover sheet</td>
+</tr>
+<tr>
+<td><code>test_summary.py</code></td>
+<td>Risk tiers; rule-backed versus ML-only; the summary never touches labels</td>
+</tr>
+<tr>
+<td><code>test_challenge.py</code></td>
+<td>Controls caught; boundary variants missed as documented; ML catches the below-materiality journals; decoys reach the queue</td>
+</tr>
+<tr>
+<td><code>test_app.py</code></td>
+<td>Every dashboard page renders (including for uploaded data), status changes work, filters apply on submit, the page stays in the URL, and <strong>the CSS never hides the sidebar controls</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pattern worth explaining: tiny ledgers.</strong> <code>tests/helpers.py</code> builds a handful of entries by hand (<code>entry</code>,
+<code>invoice</code>, <code>payment</code>, <code>make_ds</code>). A test for a rule then reads like a story: "two payments, same invoice, 2 days
+apart: both flagged; same amount 47 days apart: not flagged."</p>
+<h2 id="103-quality-gates">10.3 Quality gates</h2>
+<ul>
+<li><strong>ruff</strong> (<code>ruff check .</code>) lints and <code>ruff format .</code> formats; line length 100.</li>
+<li><strong>GitHub Actions</strong> (<code>.github/workflows/ci.yml</code>) runs ruff and pytest on every push and pull request, on Linux with
+  Python 3.13, after <code>pip install -r requirements.txt</code> (versions are pinned). A green badge shows it works on a
+  clean machine, not just yours.</li>
+<li><strong>Commit history</strong> has one commit per phase plus focused fix commits, with messages that explain <em>why</em>.</li>
+</ul>
+<h2 id="104-commands-windows-command-prompt-from-the-project-folder">10.4 Commands (Windows Command Prompt, from the project folder)</h2>
+<pre><code class="language-bat">.venv\Scripts\activate
+python -m auditlens.generate         :: build data\*.csv
+python -m auditlens.pipeline         :: analyse; outputs\review_queue.csv
+python -m auditlens.evaluate         :: metrics report + charts
+python -m auditlens.challenge_eval   :: the adversarial challenge set
+streamlit run app.py                 :: the dashboard
+pytest                               :: 162 tests
+ruff check .                         :: lint
+</code></pre>
+<h2 id="105-hands-on-exercises-do-these-they-teach-more-than-reading">10.5 Hands-on exercises (do these; they teach more than reading)</h2>
+<p>After each, undo with <code>git checkout config.yaml</code> (or <code>git checkout .</code>).</p>
+<ol>
+<li><strong>Move a threshold.</strong> In <code>config.yaml</code> set <code>rules.round_amount.multiple</code> from 1000 to 500. Run
+   <code>python -m auditlens.pipeline</code> and compare how many <code>ROUND_AMOUNT</code> flags there are (<code>outputs\flags.csv</code>). Open a few
+   new ones: are they sensible? <em>Learns:</em> thresholds trade sensitivity for noise.</li>
+<li><strong>Widen a window.</strong> Set <code>rules.duplicates.window_days</code> to 14, then run <code>python -m auditlens.challenge_eval</code>. Look
+   at <code>dup_late_repeat</code> (repeats 12-20 days later). Which now get caught? What else changes (false alarms)?</li>
+<li><strong>Lower the Benford minimum.</strong> Set <code>rules.benford.min_invoices</code> to 40 and rerun the challenge: the 40-invoice
+   fabricated vendor should now be tested. Then look at the main Benford page: does a new vendor fail?
+   <em>Learns:</em> small samples make chi-square less reliable.</li>
+<li><strong>Change a weight.</strong> Raise <code>DUP_NEAR_AMOUNT</code> from 8 to 30 and run <code>python -m auditlens.evaluate --no-stability</code>.
+   Watch precision and the combined recall move. Why did precision drop?</li>
+<li><strong>Change the ML cut-off.</strong> Set <code>ml.flag_percentile</code> to 0.95 and rerun the evaluation. ML recall rises; what happens
+   to its precision and to the size of the queue?</li>
+<li><strong>New seed.</strong> <code>python -m auditlens.generate --seed 7</code>, then evaluate. Do the numbers stay close to the stability
+   table in the report?</li>
+<li><strong>Break a rule on purpose.</strong> In <code>rules/timing.py</code> change <code>cal.WEEKEND_WEEKDAYS</code> usage to Saturday/Sunday (5, 6) and
+   run <code>pytest</code>. Which tests fail and why? <em>Learns:</em> what the tests protect. Undo it.</li>
+<li><strong>Upload errors.</strong> Download the template in the app, change one amount so the entry no longer balances, upload,
+   validate, and read the error. Then put a <code>13/03/2025</code> date in with "year first" selected.</li>
+<li><strong>Trace one entry end to end.</strong> Pick a queue entry. Find which rule codes fired (<code>flags.csv</code>), open the function that
+   produced the reason, compute its noisy-OR score by hand, and compare with the dashboard.</li>
+<li><strong>Write a new rule</strong> (recipe below).</li>
+</ol>
+<p><strong>Recipe for adding a rule.</strong> Example: "a payment posted on the same day as its invoice by the same user".</p>
+<ol>
+<li>Add a function in the right module (e.g. <code>rules/approval.py</code>) taking <code>ds: Dataset</code>, returning
+   <code>make_flags(entry_ids, FAMILY, "SAME_DAY_PAYMENT", reasons)</code>. Write the reason as a full sentence with numbers.</li>
+<li>Call it from that module's <code>run</code> (inside <code>combine([...])</code>).</li>
+<li>Add the code to <code>RULE_CODES</code> in <code>rules/__init__.py</code> and a weight in <code>config.yaml</code> <code>scoring.rule_weights</code> (a test
+   fails if a code has no weight).</li>
+<li>Put any threshold in <code>config.yaml</code> and <code>config.py</code>; never in the function.</li>
+<li>If it targets one of the 12 types, add the code to <code>TYPE_CODES</code> in <code>evaluate.py</code>.</li>
+<li>Write a unit test with a tiny ledger: one case caught, one clean case not.</li>
+<li>Run <code>pytest</code>, <code>ruff check .</code>, and <code>python -m auditlens.evaluate --publish-docs</code>, then update the README table.</li>
+</ol>
+<hr />
+<h1 id="11-design-decisions-and-trade-offs-why-this-and-not-that">11. Design decisions and trade-offs ("why this and not that")</h1>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>The alternative</th>
+<th>Why this choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rules <strong>and</strong> ML</td>
+<td>Rules only, or ML only</td>
+<td>Rules are specific and explainable (what auditors trust); ML finds what nobody wrote a rule for. The evaluation shows each one's real strengths</td>
+</tr>
+<tr>
+<td>Unsupervised ML</td>
+<td>Supervised classifier</td>
+<td>Real data has no reliable fraud labels. A supervised model would also be trained on my own planted labels and just relearn my generator</td>
+</tr>
+<tr>
+<td>Isolation Forest</td>
+<td>LOF, one-class SVM, autoencoder</td>
+<td>Fast, no scaling needed, few settings, works on mixed numeric features, easy to explain ("easy to isolate = unusual"). An autoencoder would be harder to explain and tune</td>
+</tr>
+<tr>
+<td>Entry-level unit</td>
+<td>Line-level</td>
+<td>Auditors review whole entries; many findings are properties of the entry (approver, timing)</td>
+</tr>
+<tr>
+<td>Noisy-OR combination</td>
+<td>Sum, max, or logistic regression</td>
+<td>Bounded at 100, diminishing returns, order-independent, explainable with one formula; a learned model would need labels</td>
+</tr>
+<tr>
+<td>ML points capped at 30 and only for ML-flagged entries</td>
+<td>Add the raw score</td>
+<td>Keeps rules in charge; guarantees every queued entry has a reason</td>
+</tr>
+<tr>
+<td>Rule signals excluded from ML features</td>
+<td>Include them</td>
+<td>Keeps ML an independent second opinion and the comparison meaningful</td>
+</tr>
+<tr>
+<td>All thresholds in <code>config.yaml</code></td>
+<td>Constants in code</td>
+<td>Auditors tune per client; changes are visible in version control; pydantic catches typos</td>
+</tr>
+<tr>
+<td>Percentile for the ML score</td>
+<td>Raw score</td>
+<td>Easy to threshold ("top 2%"), independent of the model's internal scale</td>
+</tr>
+<tr>
+<td>Separate <code>labels.csv</code> plus a test that scans source for label access</td>
+<td>Labels as a column</td>
+<td>Prevents leakage; shows the evaluation is honest</td>
+</tr>
+<tr>
+<td>Challenge set and base-rate analysis</td>
+<td>Report only the flattering numbers</td>
+<td>Credibility: the limits are measured and stated</td>
+</tr>
+<tr>
+<td>ML-only findings shown last, excluded from "value to follow up"</td>
+<td>Treat all High/Medium alike</td>
+<td>The evaluation says ML alone is about 13% precise, so presenting it as equal would mislead</td>
+</tr>
+<tr>
+<td>Strict date parsing</td>
+<td>Let pandas guess</td>
+<td>A silent day/month swap would corrupt every date-based test without any error</td>
+</tr>
+<tr>
+<td>Streamlit</td>
+<td>Flask/React, Power BI</td>
+<td>Python end to end, fast to build, deployable free; good fit for a portfolio data app</td>
+</tr>
+<tr>
+<td>Synthetic Bahraini company</td>
+<td>Public dataset</td>
+<td>No suitable public GL with known anomalies exists; this also shows local context (Fri/Sat weekend, BHD)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bugs found by the tests and the checks, and what they taught</strong> (good stories for an interview)</p>
+<ol>
+<li><em>Invoice-number collisions.</em> Injecting several invoices into one gap in a vendor's numbering used up the
+   numbers and reused existing ones, producing accidental duplicates and out-of-order numbers that looked like real
+   findings. Fix: shift later numbers up. Lesson: unexplained false positives often mean your <em>data generator</em> is
+   wrong, not your rule.</li>
+<li><em>Benford contamination.</em> One vendor received three split-purchase groups, so a clean vendor failed Benford.
+   Fix: choose vendors without replacement. Lesson: cross-talk between planted anomalies.</li>
+<li><em>ML entries without a reason.</em> Entries between the 95th and 98th ML percentile earned points but had no flag.
+   Fix: one threshold controls both. Lesson: every queued entry must be explainable.</li>
+<li><em>Silent date swap.</em> Described in 9.3. Lesson: validation must be strict, and a wrong setting must fail loudly.</li>
+<li><em>Sidebar that could not be re-opened.</em> Described in 9.5. Lesson: test with real user actions.</li>
+<li><em>A threshold tuned after seeing results.</em> I tightened the near-duplicate tolerance after a first run showed many
+   coincidences, and the report says so. Lesson: disclose any tuning.</li>
+</ol>
+<hr />
+<h1 id="12-interview-preparation-30-questions-with-answers">12. Interview preparation: 30 questions with answers</h1>
+<p>Answer in your own words; the bold phrases are the key ideas.</p>
+<p><strong>The project</strong></p>
+<ol>
+<li><strong>What is AuditLens in one sentence?</strong> A journal-entry analytics tool that combines 23 explainable audit tests
+   with an unsupervised anomaly model into a ranked review queue, evaluated against planted ground-truth anomalies.</li>
+<li><strong>Why did you build it?</strong> Auditors must look for fraud and error in tens of thousands of entries; analytics
+   tests the whole population and focuses human time on the riskiest entries (ISA 240 expects journal-entry testing).</li>
+<li><strong>Why synthetic data?</strong> Real ledgers are confidential, and real data has no answer key. Synthetic data lets me
+   plant known anomalies and measure precision and recall. The price is that results show the system works on data
+   like mine, which I state openly.</li>
+<li><strong>How is your data realistic?</strong> Month-end spikes, seasonal revenue (Ramadan dip), recurring vendors, an approval
+   hierarchy, vendor invoice numbering, the Bahrain Friday/Saturday weekend and public holidays, BHD with three
+   decimals, and Benford-conforming amounts.</li>
+<li><strong>What was the hardest part?</strong> Making the evaluation honest: preventing label leakage, avoiding generator
+   artefacts that looked like findings, and being candid that the test is partly circular.</li>
+</ol>
+<p><strong>Audit and rules</strong></p>
+<ol start="6">
+<li><strong>Explain a split purchase.</strong> Someone splits one large purchase into several invoices each just under their
+   approval limit, so no higher approval is needed. I flag three or more invoices at 90-100% of a limit from the same
+   creator to the same vendor within 10 days.</li>
+<li><strong>Why test weekend postings only for manual entries?</strong> Payroll and depreciation run automatically on the last day
+   of the month, even on a weekend. People rarely have a reason to key entries when the office is shut.</li>
+<li><strong>What does the post-close test catch?</strong> Entries posted after the period closed (month end plus 5 days); they
+   change reported results after management has seen them.</li>
+<li><strong>How do you detect a ghost vendor?</strong> Match vendor bank account or address to employees after normalising text.
+   I flag every entry of that vendor because the risk attaches to the vendor.</li>
+<li><strong>Why a bank-change test?</strong> A changed bank account followed quickly by a large payment is the classic
+    business-email-compromise pattern. I flag payments of at least 20,000 and 5 times the vendor's median within 14
+    days of a change.</li>
+<li><strong>Why three duplicate tests?</strong> Evidence strength differs: the same invoice paid twice is strongest, an identical
+    amount next, a near amount weakest (coincidences are common), so they carry weights 40, 35 and 8.</li>
+</ol>
+<p><strong>Benford</strong></p>
+<ol start="12">
+<li><strong>What is Benford's Law?</strong> In many natural datasets the leading digit is 1 about 30% of the time and 9 about 5%;
+    P(d) = log10(1 + 1/d). Invented numbers often break it.</li>
+<li><strong>How do you test it?</strong> Chi-square goodness of fit with 8 degrees of freedom on a vendor's leading digits, flagged
+    at p below 0.001, only with at least 50 invoices.</li>
+<li><strong>When does Benford fail?</strong> Assigned numbers, capped or contract amounts, narrow ranges, small samples. So a
+    flag is a lead, not proof.</li>
+<li><strong>Why such a strict p-value?</strong> I test about 55 vendors; at p &lt; 0.001 I expect about 0.05 false alarms, at 0.05 I
+    would expect nearly three.</li>
+</ol>
+<p><strong>Machine learning</strong></p>
+<ol start="16">
+<li><strong>How does Isolation Forest work?</strong> It builds random trees by splitting on random features and values; unusual
+    entries are isolated in fewer splits, so a short average path length means anomalous.</li>
+<li><strong>Why not supervised learning?</strong> No trustworthy labels in real life, and my planted labels would only teach it my
+    generator.</li>
+<li><strong>What are your features?</strong> Twenty: amount and account z-scores, vendor frequency and amount statistics,
+    closeness to neighbouring vendor entries, time features, posting lag, manual or automated, user-account and
+    account-pair rarity, and amount relative to the approver's limit.</li>
+<li><strong>Why leave the rule signals out of the features?</strong> So the ML layer is an independent second opinion; otherwise it
+    would just rediscover the rules.</li>
+<li><strong>How do you explain an ML flag?</strong> Compare each feature with entries of the same kind (source and vendor group)
+    using a robust z-score (median and MAD), and name the three most unusual features in plain language.</li>
+<li><strong>Why is ML precision only 13%?</strong> It finds entries that are numerically unusual, but most audit anomalies are
+    relational (a duplicate looks like any payment on its own). It also flags many legitimate large or rare entries.
+    It is a second opinion, and I score it that way.</li>
+</ol>
+<p><strong>Scoring and evaluation</strong></p>
+<ol start="22">
+<li><strong>Explain the risk score.</strong> Rule weights combine by noisy-OR (100 x (1 - product of (1 - w/100)), so more
+    evidence raises the score with diminishing returns and never exceeds 100), plus up to 30 points for
+    ML-flagged entries. It maps to High (50+), Medium (20+) and Low.</li>
+<li><strong>Walk through precision and recall.</strong> Of what the rules flagged, 84% were real (precision); of what was real, the
+    rules found 100% (recall). F1 balances both. At the top 100 of the queue precision is 100%.</li>
+<li><strong>Your recall is 100%. Isn't that suspicious?</strong> Yes, and I say so: I wrote the rules and the generator from the
+    same definitions, so it shows correct implementation, not real-world strength. That is why I built an
+    adversarial challenge set.</li>
+<li><strong>What does the challenge set show?</strong> Controls are caught 100%; boundary cases just outside a threshold only 3%;
+    ML rescues the journals just under materiality; legitimate look-alikes all reach the queue. So thresholds are
+    avoidable and the output is a lead.</li>
+<li><strong>What would precision be in a real ledger?</strong> With a 0.1% anomaly rate and my 0.32% false-positive rate, about
+    24%, i.e. roughly three false alarms per real problem. The synthetic 84% is optimistic.</li>
+<li><strong>How would you reduce false positives?</strong> Feedback loop from reviewers' decisions to re-weight rules, per-client
+    thresholds, fuzzy matching, evidence attachments so legitimate entries can be excluded, and graduated scores
+    near thresholds.</li>
+</ol>
+<p><strong>Engineering and deployment</strong></p>
+<ol start="28">
+<li><strong>How do you know it works on a fresh machine?</strong> GitHub Actions runs ruff and 162 tests on Linux for every
+    push, with pinned dependencies.</li>
+<li><strong>How does the upload feature protect against bad data?</strong> Column mapping, strict date formats, pydantic row
+    validation with row and column error messages, a balance check on every entry, and warnings about which tests
+    become blind when columns are missing.</li>
+<li><strong>How would it scale to millions of lines?</strong> The rules are vectorised pandas; the duplicate test does a
+    self-join per vendor, which would need windowed joins or a database at that scale. Move the pipeline to a
+    warehouse or Spark, keep the same logic, and process by period.</li>
+</ol>
+<p><strong>Curveballs</strong></p>
+<ul>
+<li><em>"What if the fraudster knows your thresholds?"</em> They can stay just under them; the challenge set measures
+  exactly that. Mitigations: randomised or graduated thresholds, vendor-level totals regardless of creator, and
+  the ML layer, which caught the below-materiality journals.</li>
+<li><em>"What did you get wrong?"</em> The six stories in Section 11.</li>
+<li><em>"Is this production-ready?"</em> No: single synthetic company, no VAT or multi-currency, no audit trail or access
+  control. It is a credible prototype with honest limits.</li>
+<li><em>"Does it replace an auditor?"</em> No: it narrows the population and explains why; judgement and evidence remain
+  with the auditor.</li>
+</ul>
+<hr />
+<h1 id="13-glossary-and-quick-reference">13. Glossary and quick reference</h1>
+<h2 id="131-glossary">13.1 Glossary</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>General ledger (GL)</td>
+<td>The company's master record of all financial transactions</td>
+</tr>
+<tr>
+<td>Journal entry</td>
+<td>One recorded transaction; its debits equal its credits</td>
+</tr>
+<tr>
+<td>Chart of accounts</td>
+<td>The numbered list of accounts</td>
+</tr>
+<tr>
+<td>Accounts payable (AP)</td>
+<td>Money owed to suppliers (account 2000)</td>
+</tr>
+<tr>
+<td>Posting date / document date</td>
+<td>When it was recorded / the date on the source document</td>
+</tr>
+<tr>
+<td>Period close</td>
+<td>The cut-off after which a month should not receive postings</td>
+</tr>
+<tr>
+<td>Manual / automated entry</td>
+<td>Keyed by a person / generated by a system</td>
+</tr>
+<tr>
+<td>Segregation of duties</td>
+<td>Different people create and approve</td>
+</tr>
+<tr>
+<td>Materiality</td>
+<td>The size above which an error would matter to users of the accounts (250,000 here)</td>
+</tr>
+<tr>
+<td>Management override</td>
+<td>Management bypassing controls, often via unusual journals (ISA 240)</td>
+</tr>
+<tr>
+<td>Ghost vendor</td>
+<td>A fictitious vendor set up to receive payments</td>
+</tr>
+<tr>
+<td>Benford's Law</td>
+<td>Expected distribution of leading digits</td>
+</tr>
+<tr>
+<td>Chi-square, p-value</td>
+<td>A measure of deviation from expected counts; the chance of a deviation that large by luck</td>
+</tr>
+<tr>
+<td>MAD</td>
+<td>Mean absolute deviation of digit shares; also median absolute deviation (robust z-score)</td>
+</tr>
+<tr>
+<td>Z-score</td>
+<td>How many standard deviations a value is from average</td>
+</tr>
+<tr>
+<td>Isolation Forest</td>
+<td>An anomaly detector that isolates unusual points with random splits</td>
+</tr>
+<tr>
+<td>Percentile</td>
+<td>A value's rank as a fraction (0.98 = top 2%)</td>
+</tr>
+<tr>
+<td>Noisy-OR</td>
+<td>Probability-style combination: 1 minus the product of (1 - weight)</td>
+</tr>
+<tr>
+<td>False positive / false negative</td>
+<td>Flagged but fine / missed but real</td>
+</tr>
+<tr>
+<td>Precision, recall, F1</td>
+<td>Share of flags that are real; share of real that are flagged; their balance</td>
+</tr>
+<tr>
+<td>Precision@K</td>
+<td>Precision among the top K ranked entries</td>
+</tr>
+<tr>
+<td>Base rate (prevalence)</td>
+<td>How common true positives are in the population</td>
+</tr>
+<tr>
+<td>Wilson interval</td>
+<td>A confidence interval for a proportion</td>
+</tr>
+<tr>
+<td>Label leakage</td>
+<td>Using the answer key when building the detector</td>
+</tr>
+<tr>
+<td>Boundary case / decoy / control</td>
+<td>Just outside a threshold / legitimate look-alike / should-be-caught case</td>
+</tr>
+<tr>
+<td>Rule-backed / ML-only</td>
+<td>Matches a specific audit test / flagged only as statistically unusual</td>
+</tr>
+<tr>
+<td>Workpaper</td>
+<td>An auditor's documented record of work done</td>
+</tr>
+</tbody>
+</table>
+<h2 id="132-numbers-to-know-cold">13.2 Numbers to know cold</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ledger</td>
+<td>49,464 lines, 24,714 entries, 1 fictional company, FY2025</td>
+</tr>
+<tr>
+<td>Planted anomalies</td>
+<td>412 entries (1.7%), 12 types</td>
+</tr>
+<tr>
+<td>Rules</td>
+<td>23 codes in 8 families</td>
+</tr>
+<tr>
+<td>ML</td>
+<td>Isolation Forest, 300 trees, 20 features, top 2% flagged</td>
+</tr>
+<tr>
+<td>Queue</td>
+<td>903 entries: 71 High, 427 Medium, 405 Low</td>
+</tr>
+<tr>
+<td>Rules alone</td>
+<td>precision 84.1%, recall 100%, F1 0.914</td>
+</tr>
+<tr>
+<td>ML alone</td>
+<td>precision 13.3%, recall 16.0%, F1 0.146</td>
+</tr>
+<tr>
+<td>Combined (risk 20+)</td>
+<td>precision 69.9%, recall 84.5%, F1 0.765</td>
+</tr>
+<tr>
+<td>Precision@50 / @100</td>
+<td>100% / 100% (rules and combined)</td>
+</tr>
+<tr>
+<td>Realistic precision at 0.1% prevalence</td>
+<td>about 24%</td>
+</tr>
+<tr>
+<td>Challenge set</td>
+<td>controls 100%, boundary cases 3% (intended rule)</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td>162 passing; CI green</td>
+</tr>
+</tbody>
+</table>
+<h2 id="133-key-thresholds-all-in-configyaml">13.3 Key thresholds (all in <code>config.yaml</code>)</h2>
+<p>Duplicate window 7 days, near tolerance 0.5%; split band 90-100% of limit, 3 invoices in 10 days; backdating over 30
+days; period closes 5 days after month end; round amounts: multiples of 1,000, at least 5,000, contract exempt at 6
+repeats; materiality 250,000, last 3 business days; bank change window 14 days, 20,000 and 5 times median;
+sequence gap over 50; Benford at least 50 invoices, p below 0.001; rare pair at most 3 entries; rare user-account at
+most 3 with at least 50 user entries; ML flag at the 98th percentile, at most 30 points; tiers 50 and 20.</p></body></html>
