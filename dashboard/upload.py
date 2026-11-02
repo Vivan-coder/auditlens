@@ -43,7 +43,7 @@ def read_csv_bytes(data: bytes) -> pd.DataFrame:
     return pd.read_csv(BytesIO(data), dtype=str, keep_default_na=False, na_values=[""])
 
 
-def _mapping_form(cols: list[str]) -> dict[str, str | None]:
+def _mapping_form(cols: list[str], file_id: str) -> dict[str, str | None]:
     guess = suggest_mapping(cols)
     options = [NONE, *cols]
     mapping: dict[str, str | None] = {}
@@ -52,7 +52,11 @@ def _mapping_form(cols: list[str]) -> dict[str, str | None]:
         req = f in REQUIRED_FIELDS
         default = options.index(guess[f]) if guess[f] in options else 0
         box = (c1 if i % 2 == 0 else c2).selectbox(
-            f"{f}{' *' if req else ''}", options, index=default, help=HELP[f], key=f"map_{f}"
+            f"{f}{' *' if req else ''}",
+            options,
+            index=default,
+            help=HELP[f],
+            key=f"map_{f}_{file_id}",
         )
         mapping[f] = None if box == NONE else box
     return mapping
@@ -120,7 +124,7 @@ def render(b: Bundle) -> None:
     st.caption(f"{len(raw):,} rows, {len(raw.columns)} columns. Preview:")
     st.dataframe(raw.head(8), hide_index=True, width="stretch")
     st.subheader("1. Map columns")
-    mapping = _mapping_form(list(raw.columns))
+    mapping = _mapping_form(list(raw.columns), file.file_id)
     dayfirst = (
         st.radio(
             "Date format", ["Year first (2025-03-31)", "Day first (31/03/2025)"], horizontal=True
@@ -130,9 +134,9 @@ def render(b: Bundle) -> None:
     st.subheader("2. Validate")
     if st.button("Validate file", type="primary"):
         res = validate_journal(apply_mapping(raw, mapping), dayfirst=dayfirst)
-        st.session_state["upload_result"] = (file.name, res)
+        st.session_state["upload_result"] = (file.file_id, res)
     name_res = st.session_state.get("upload_result")
-    if not name_res or name_res[0] != file.name:
+    if not name_res or name_res[0] != file.file_id:
         return
     _show_result(name_res[1])
     if name_res[1].ok:

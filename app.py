@@ -50,6 +50,7 @@ def main() -> None:
         st.session_state["nav"] = wanted if wanted in PAGES else "Overview"
     _sidebar()
     bundle = state.active_bundle()
+    st.query_params["page"] = st.session_state["nav"]  # refresh keeps the current page
     PAGES[st.session_state["nav"]](bundle)
 
 

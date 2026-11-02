@@ -69,3 +69,61 @@ def test_overview_has_executive_summary_and_themes():
     html = " ".join(m.value for m in at.markdown)
     assert "Executive summary" in html and "High risk" in html
     assert any("Suggested procedure" in m.value for m in at.expander[0].markdown)
+
+
+def test_css_never_hides_the_sidebar_controls():
+    """Regression: hiding the toolbar once made a collapsed sidebar impossible to re-open."""
+    from dashboard.style import CSS
+
+    for rule in CSS.split("}"):
+        if "display: none" in rule or "visibility: hidden" in rule or "visibility:hidden" in rule:
+            selectors = rule.split("{")[0]
+            assert "stToolbar" not in selectors and "stHeader" not in selectors
+            assert "ExpandSidebar" not in selectors and "SidebarCollapse" not in selectors
+    assert "stExpandSidebarButton" in CSS and "visibility: visible" in CSS
+
+
+def test_page_is_kept_in_the_url_for_refresh():
+    at = run_page("Review queue")
+    assert at.query_params["page"] == ["Review queue"] or at.query_params["page"] == "Review queue"
+    fresh = AppTest.from_file(APP, default_timeout=180)
+    fresh.query_params["page"] = "Benford analysis"
+    fresh.run()
+    assert not fresh.exception
+    assert "Benford" in " ".join(m.value for m in fresh.markdown)
+
+
+@pytest.mark.parametrize("page", PAGES)
+def test_every_page_renders_for_uploaded_data(page, journal):
+    """Uploaded data has no labels or master data: no page may crash."""
+    from dashboard.state import UPLOADED, make_uploaded_bundle
+
+    from auditlens.schema import validate_journal
+
+    keep = journal["entry_id"].drop_duplicates().iloc[:3000]
+    res = validate_journal(journal[journal["entry_id"].isin(keep)].copy())
+    assert res.ok
+    at = AppTest.from_file(APP, default_timeout=180)
+    at.session_state["upload_bundle"] = make_uploaded_bundle("slice.csv", res.journal)
+    at.session_state["active_dataset"] = UPLOADED
+    at.session_state["_goto"] = page
+    at.run()
+    assert not at.exception, [e.value for e in at.exception]
+
+
+def test_tiny_upload_does_not_crash_any_page():
+    from io import StringIO
+
+    import pandas as pd
+    from dashboard.state import UPLOADED, make_uploaded_bundle
+
+    from auditlens.schema import template_csv, validate_journal
+
+    res = validate_journal(pd.read_csv(StringIO(template_csv())))
+    for page in PAGES:
+        at = AppTest.from_file(APP, default_timeout=180)
+        at.session_state["upload_bundle"] = make_uploaded_bundle("t.csv", res.journal)
+        at.session_state["active_dataset"] = UPLOADED
+        at.session_state["_goto"] = page
+        at.run()
+        assert not at.exception, (page, [e.value for e in at.exception])

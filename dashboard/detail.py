@@ -48,7 +48,7 @@ def _lines(b: Bundle, entry_id: str) -> pd.DataFrame:
     j = b.dataset.journal
     lines = j[j["entry_id"] == entry_id][["line_id", "account", "debit", "credit"]].copy()
     names = b.account_names
-    lines.insert(2, "account_name", lines["account"].map(names).fillna(""))
+    lines.insert(2, "account_name", lines["account"].map(lambda a: names.get(a, "")))
     return lines
 
 

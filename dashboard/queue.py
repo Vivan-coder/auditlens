@@ -65,7 +65,7 @@ def _filters(b: Bundle, q: pd.DataFrame) -> dict:
         accounts = c6.multiselect(
             "Account", acct_opts, format_func=lambda a: f"{a} {names.get(a, '')}".strip()
         )
-        c7, c8, c9 = st.columns([2, 2, 2])
+        c7, c8, c9 = st.columns([3, 2, 2])
         lo, hi = _date_bounds(q)
         dr = c7.date_input("Posting date", (lo, hi), min_value=lo, max_value=hi)
         top = float(q["amount"].max())

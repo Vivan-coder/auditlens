@@ -12,7 +12,16 @@ BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"  # validated categorical sl
 CSS = """
 <style>
 .block-container {padding-top: 3.4rem; max-width: 1280px;}
-[data-testid="stToolbar"], [data-testid="stDeployButton"], footer {visibility: hidden; height: 0;}
+/* Hide only the Deploy button, main menu and footer. NEVER hide the toolbar itself: it holds the
+   control that re-opens a collapsed sidebar. */
+[data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stDeployButton"],
+footer {display: none !important;}
+[data-testid="stExpandSidebarButton"], [data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapseButton"] button {
+    visibility: visible !important; opacity: 1 !important;}
+[data-testid="stExpandSidebarButton"] {background:#1f3a5f; color:#fff; border-radius:6px;}
+[data-testid="stExpandSidebarButton"] svg,
+[data-testid="stExpandSidebarButton"] span {color:#fff; fill:#fff;}
 section[data-testid="stSidebar"] {border-right: 1px solid #e6e5e1; background: #f4f5f7;}
 section[data-testid="stSidebar"] .al-brand {font-size:1.25rem; font-weight:700; color:#1f3a5f;
     letter-spacing:-0.01em; margin-bottom:.1rem;}
@@ -26,7 +35,10 @@ section[data-testid="stSidebar"] .al-brand {font-size:1.25rem; font-weight:700; 
 .al-kpi:hover {box-shadow: 0 2px 10px rgba(31,58,95,.10);}
 .al-kpi.High {border-top-color:#c0392b;} .al-kpi.Medium {border-top-color:#d98e04;}
 .al-kpi .l {font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:#52514e;}
-.al-kpi .v {font-size:1.7rem; font-weight:700; color:#0b0b0b; line-height:1.25;}
+.al-kpis {display:grid; grid-template-columns:repeat(auto-fit, minmax(175px, 1fr)); gap:.75rem;
+    margin-bottom:.4rem;}
+.al-kpi .v {font-size:clamp(1.2rem, 2.3vw, 1.7rem); font-weight:700; color:#0b0b0b;
+    line-height:1.25; white-space:nowrap; word-break:normal; overflow-wrap:normal;}
 .al-kpi .s {font-size:.8rem; color:#52514e;}
 .al-card {background:#fff; border:1px solid #e6e5e1; border-radius:8px; padding:14px 18px;
     margin-bottom:.8rem;}
@@ -81,9 +93,10 @@ def kpi(label: str, value: str, sub: str = "", tone: str = "") -> str:
 
 def kpi_row(items: list[tuple]) -> None:
     """A row of KPI cards: (label, value, subtitle[, tone])."""
-    cols = st.columns(len(items))
-    for col, item in zip(cols, items, strict=True):
-        col.markdown(kpi(*item), unsafe_allow_html=True)
+    cards = "".join(
+        kpi(*item) for item in items
+    )  # one grid: wraps instead of squeezing on small screens
+    st.markdown(f'<div class="al-kpis">{cards}</div>', unsafe_allow_html=True)
 
 
 def pill(text: str) -> str:

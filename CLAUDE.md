@@ -91,6 +91,10 @@ ML weakness, small n). Do not tune thresholds against labels; if one changes, sa
   excluded from "value to follow up" (evaluation shows ~13% precision for ML alone).
 - Styling is restrained and original (navy palette). Do not use any firm's logo, name or brand assets.
 - Excel workpaper (`export.py`): Cover (scope, procedures, legend, conclusion, sign-off), Flagged entries, Summary.
+- CSS must NEVER hide `stToolbar`/`stHeader`: the control that re-opens a collapsed sidebar lives there (a past bug).
+  Hide only `stAppDeployButton`, `stMainMenu` and `footer`. A test guards this.
+- The current page is kept in the URL (`?page=...`) so a browser refresh stays on the page.
+- KPI cards use one CSS grid (`.al-kpis`) so they wrap instead of squeezing on narrow screens.
 - Queue filters live in an `st.form`; review controls on the detail page are an `st.fragment`.
 
 ## Rules for working in this repo
