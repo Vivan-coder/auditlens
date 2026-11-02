@@ -11,7 +11,7 @@ set of known, deliberately planted anomalies.
 > **All data in this repository is synthetic.** The company, vendors, employees and users are
 > fictional, and the anomalies were planted on purpose. No real client or personal data is used anywhere.
 
-<!-- Live demo: add the Streamlit Community Cloud link here after deploying (see docs/deployment.md) -->
+**Live demo: https://auditlenses.streamlit.app/** (the first load can take up to a minute while the demo ledger is prepared)
 
 | | |
 |---|---|
